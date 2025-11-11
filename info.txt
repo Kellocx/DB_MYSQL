@@ -1,0 +1,44 @@
+// COMANDI MYSQL
+
+//----------------------- USARE O SCEGLIERE IL DATABASE ----------------------
+
+USE 'nome_db;
+
+
+
+//----------------------- CREARE TABELLA ----------------------
+
+
+CREATE TABLE UTENTI (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR (10),
+    cognome VARCHAR (10),
+    eta INT
+)
+
+//----------------------- INSERIMENTO DATOI IN UNA  TABELLA ----------------------
+
+
+INSERT INTO nome_tabella (nome, cognome, eta)
+
+VALUES ('Mario', 'Rossi', 35),
+       ('Luigi', 'Bianchi', 46),
+       ('Pippo', 'Paperino', 67);
+
+
+//----------------------- LEGGERE I DATOI IN UNA  TABELLA ----------------------
+
+SELECT * FROM nome_tabella WHERE eta >= 18;
+SELECT * FROM nome_tabella WHERE nome >= Mario;
+
+//----------------------- AGGIORNARE I DATOI IN UNA  TABELLA ----------------------
+
+UPDATE nome_tabella
+SET eta = 36
+WHERE NOME = 'Mario';
+
+
+//----------------------- CANCELLARE  I DATOI IN UNA  TABELLA ----------------------
+
+DELETE FROM nome_tabella
+WHERE NOME = 'Mario';
