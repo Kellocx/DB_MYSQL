@@ -44,7 +44,7 @@ WHERE nome = 'Mario';
 
 
 
-//---------------------------CANCELLARE UN DATO----------------------------
+//---------------------------CANCELLARE UN DATO DALLA TABELLA ----------------------------
 
 
 DELETE FROM nome_tabella
@@ -52,7 +52,71 @@ DELETE FROM nome_tabella
 WHERE nome = 'Mario';
 
 
-
+//---------------------------CANCELLARE UN DATDATABASE ----------------------------
 //CANCELLARE DATABASE
 
 DROP DATABASE nome_database;
+
+
+//-----------------
+
+SELEZIONE DI PRODOTTI IN BASE ALLA QUANTITA
+//seezionare il nome prezzo e quantita dei prodotti con quantita minore di 5
+SELECT  nome, prezzo, quantita FROM prodotti WHERE quantita < 5; 
+
+ORDINARE PRODOTTI IN ORDINE DECRESCENTE
+//ordinare tutti i prodotti in ordine per prezzo decrescente
+SELECT * FROM prodotti ORDER BY prezzo DESC;
+
+RANGE DI PRODOTTI
+//ordinare tutti i prodotti con un prezzo compreso tra un range di prezzi
+SELECT * FROM prodotti WHERE prezzo BETWEEN 100 AND 900;
+
+ORDINARE PRODOTTI IN ORDINE CRESCENTE
+//ordinare tutti i prodotti in ordine per prezzo crescente
+SELECT * FROM prodotti ORDER BY prezzo ASC;
+
+CALCOLARE IL PREZZO MEDIO 
+//calcolare il prezzo medio per categoria
+SELECT categoria, AVG(prezzo) AS prezzo_medio FROM prodotti GROUP BY categoria;
+
+AGGIORNARE 
+//aggiornare la quantità di un prodotto esistente
+UPDATE prodotti SET quantita = quantita + 5 WHERE ID = 4;
+
+CANCELLARE UN PRODOTTO
+//cancella prodotto tramite ID
+DELETE FROM prodotti WHERE ID = 6;
+
+//--------------------------- CONFIG  FILE DATDATABASE --------------------------
+
+OPERAZIONI CRUD
+
+
+
+//---------------------------  SELEXZIONARE TUTTO DI UNA TABELLA ---------------
+
+SELECT * FROM nome_tabella
+
+
+//---------------------------  PRIMARY KEY ---------------
+
+CREO UNA FOREIGN KEY CHE COLLEGA LE DUE TABELLE
+
+TABLE appartamenti                        TABLE inquilini
+
+ID INT AUTO_INCREMENT PRIMARY KEY         ID INT AUTO_INCREMENT PRIMARY KEY
+                                          id_appartamento INT
+                                          FOREIGN KEY (id_appartamento ) REFERENCES appartamenti(id);
+
+
+//---------------------------  COLONNE ---------------
+
+AGGIUNGI COLONNA
+ALTER TABLE nome_table ADD COLUMN nome_colonna TIPO_DI_DATO;
+es.: ALTER TABLE immobili ADD COLUMN giardino BOOLEAN;
+
+
+ELIMINA COLONNA
+ALTER TABLE nome_table DROP COLUMN nome_colonna;
+es.: ALTER TABLE immobili DROP COLUMN giardino

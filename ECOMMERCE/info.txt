@@ -1,0 +1,11 @@
+CREATE TABLE ordini (
+	
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    prodotto VARCHAR(50) NOT NULL,
+    quantita INT NOT NULL,
+    data_di_ordine DATE NOT NULL,
+    
+    contatto_id INT NOT NULL,
+    FOREIGN KEY (contatto_id) REFERENCES contatti(id) ON DELETE CASCADE
+
+);

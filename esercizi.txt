@@ -33,7 +33,7 @@ INSERT INTO prodotti (nome, categoria, prezzo, quantita, disponibile) VALUES
 ('Frigorifero', 'Elettrodomestici', 1199.00, 5, TRUE),
 ('Cuffie', 'Audio', 399.00, 1, TRUE);
 
-
+---------------------- ESERCIZI QUERY 1 -----------------------------
         / mostare tutti i prodotti disponibili
         SELECT * FROM `prodotti` WHERE disponibile = TRUE;
 
@@ -41,6 +41,95 @@ INSERT INTO prodotti (nome, categoria, prezzo, quantita, disponibile) VALUES
         // elencare tutti i prodotti di una categoria a vs. scelta
         SELECT * FROM `prodotti` WHERE categoria = 'INFORMATICA';
 
-        ------------------------    ---------------------------------------
+---------------------- ESERCIZI QUERY 2 -----------------------------
 
 
+//seezionare il nome prezzo e quantita dei prodotti con quantita minore di 5
+
+SELECT  nome, prezzo, quantita FROM prodotti WHERE quantita < 5; 
+
+
+//ordinare tutti i prodotti in ordine per prezzo decrescente
+SELECT * FROM prodotti ORDER BY prezzo DESC;
+
+//ordinare tutti i prodotti con un prezzo compreso tra un range di prezzi
+SELECT * FROM prodotti WHERE prezzo BETWEEN 100 AND 900;
+
+//ordinare tutti i prodotti in ordine per prezzo crescente
+SELECT * FROM prodotti ORDER BY prezzo ASC;
+
+//calcolare il prezzo medio per categoria
+SELECT categoria, AVG(prezzo) AS prezzo_medio FROM prodotti GROUP BY categoria;
+
+------------------------------------- // ESERCIZIO APPARTAMENTI -------------------
+Creare DB appartamenti, tabella e inserire : ID, INTERNO, PIANO, METRI_QUADRI, PROPRIETARIO
+
+
+
+CREARE DB APPARTAMENTI, 
+CREARE TABELLA, 
+E INSERIRE : ID , INTERNO, PIANO, METRI_QUADRI, PROPRIETARIO
+
+//INSERIMENTO DATI, POPOLARLO
+
+AGGIORNAMNETO DI UN DATO: MQ
+
+CANCELLARE UN DATO: UN INTERNO
+//MOSTRARE TUTTI GLI APPARTAMENTI 
+//MOSTRARE TUTTI GLI APPARTAMENTI AL 2° PIANO
+//MOSTRARE TUTTI GLI APPARTAMENTI CON PIU DI 80MQ
+//MOSTRARE SOLO INTERNO E PROPRIETARIO
+
+
+// ESERCIZIO APPARTAMENTI
+
+
+
+
+    CREARE DB APPARTAMENTI, 
+    CREARE TABELLA, 
+    E INSERIRE : ID , INTERNO, PIANO, METRI_QUADRI, PROPRIETARIO 
+
+        //MOSTRARE TUTTI GLI APPARTAMENTI
+SELECT * FROM `immobili` WHERE categoria = 'appartamento';
+SELECT * FROM immobili;
+
+        //MOSTRARE GLI APPARTEMENTI AL 2° PIANO
+        SELECT * FROM `immobili` WHERE piano = 2;
+
+
+        //MOSTRARE APPARTAMENTI CON PIU DI 80MQ2
+        SELECT * FROM `immobili` WHERE mq > 80;
+
+        //MOSTRARE SOLO INTERNO E PROPRIETARIO
+        SELECT interno, proprietario FROM `immobili`;
+
+        //ORDINARE GLI APPARTAMENTI PER METRI_QUADRI DAL PIU GRANDE AL PIU PICCOLO
+        SELECT * FROM immobili ORDER BY mq DESC;
+
+        //CALCOLA LA MEDIA DEI METRI_QUADRI
+        SELECT AVG(mq) AS media _mq FROM immobili;
+        
+        //INSERIMENTO DI DATI , POPOLARLO
+
+        //AGGIORNAMENTO DI UN DATO (METRI_QUADRI)
+        UPDATE immobili SET mq = mq + 5 WHERE ID = 4;   
+        //CANCELLARE UN DATO ( UN INTERNO )
+
+        //CANCELLARE APPARTAMENTI SOTTO GLI 80MQ2
+
+
+        INSERT INTO IMMOBILI (proprietario, interno, piano, mq)
+
+VALUES  ('Verdi','Scala A',1, 220),
+		('Bianchi','Scala A',2,190),
+        ('Rossi','Scala B',3, 78),
+        ('Bianchi','Scala B',1,90),
+        ('Aranci','Scala A',2, 60),
+        ('Oro','Scala B',3,180);
+
+
+        UPDATE immobili SET categoria = appartamenti  WHERE appartamenti = null;
+
+        AGGIUNGERI 5MQ AGLI APPARTAMENTI 1 PIANO
+         UPDATE immobili SET mq = mq + 5 WHERE Ipiano= 1;   
