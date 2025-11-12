@@ -1,0 +1,46 @@
+CREATE TABLE prodotti (
+    
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(10) NOT NULL,
+    categoria VARCHAR(30) NOT NULL,
+    prezzo DECIMAL(10,2) NOT NULL,
+    quantita INT NOT NULL DEFAULT 0,
+    disponibile BOOLEAN NOT NULL DEFAULT TRUE
+    
+    );
+
+
+INSERT INTO prodotti (nome, categoria, prezzo, quantita, disponibile)
+
+VALUES  ('Pc portatile Asus','INFORMATICA',999.99, 10, FALSE),
+		('Concime 20 kg','GIARDINAGGIO',919.50, 3, TRUE),
+        ('Cuccia enorme','PET',959.99, 6, TRUE),
+        ('Tastiera','INFORMATICA',139.37, 1, FALSE),
+        ('Crocchette','PET',9.20, 22, TRUE),
+        ('Gioco','PET',9.99, 45, FALSE),
+        ('Cavi','INFORMATICA',99.50, 30, TRUE),
+        ('Sabbia','GIARDINAGGIO',79.99, 4, TRUE),
+        ('Pc fisso','INFORMATICA',899.79, 2,TRUE);
+
+        -----------------------------------------------------------------
+
+INSERT INTO prodotti (nome, categoria, prezzo, quantita, disponibile) VALUES
+('Laptop, 'Informatica', 999.99, 3, TRUE),
+('Mouse', 'Informatica', 79.90, 10, TRUE),
+('TV', 'Elettronica', 699.00, 2, TRUE),
+('Smartphone', 'Telefonia', 349.00, 7, TRUE),
+('Stampante', 'Informatica', 129.90, 0, FALSE),
+('Frigorifero', 'Elettrodomestici', 1199.00, 5, TRUE),
+('Cuffie', 'Audio', 399.00, 1, TRUE);
+
+
+        / mostare tutti i prodotti disponibili
+        SELECT * FROM `prodotti` WHERE disponibile = TRUE;
+
+
+        // elencare tutti i prodotti di una categoria a vs. scelta
+        SELECT * FROM `prodotti` WHERE categoria = 'INFORMATICA';
+
+        ------------------------    ---------------------------------------
+
+
