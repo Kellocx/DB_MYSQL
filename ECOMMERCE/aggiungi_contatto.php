@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     mysqli_query($conn, $sql);
 
     //rendirizzamento utente alla index post inserimento
-    header("Location: index.php");
+    header("Location: index.php?success=aggiunto");
 }
 ?>
 
