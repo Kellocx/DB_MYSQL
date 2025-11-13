@@ -38,7 +38,7 @@ $result = mysqli_query($conn, "SELECT * FROM contatti"); // query per prendermi 
     <div class="container">
 
         <h1>Rubrica contatti</h1>
-        <a href="aggiungi_contatto.php" class="btn btn-primary">Aggiungi contatto</a>
+
 
 
         <table class=" table">
@@ -46,16 +46,16 @@ $result = mysqli_query($conn, "SELECT * FROM contatti"); // query per prendermi 
             <thead>
                 <tr>
                     <th>
-                        Nome 
+                        Nome
                     </th>
                     <th>
-                        Telefono 
+                        Telefono
                     </th>
                     <th>
-                        Email 
+                        Email
                     </th>
                     <th>
-                        Actions 
+                        Actions
                     </th>
 
                 </tr>
@@ -104,7 +104,9 @@ $result = mysqli_query($conn, "SELECT * FROM contatti"); // query per prendermi 
                     </div>
                 <?php endwhile; ?>
             </tbody>
+
         </table>
+        <a href="aggiungi_contatto.php" class="btn btn-primary">Aggiungi contatto</a>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
