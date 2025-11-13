@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = trim($_POST['data']);
 
     if ($prodotto && $quantita && $data) {
-        $update = "UPDATE ordini SET prodotto = ?, quantita = ?, data = ? WHERE id = ?";
+        $update = "UPDATE ordini SET prodotto = ?, quantita = ?, data_di_ordine = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $update);
         mysqli_stmt_bind_param($stmt, "sisi", $prodotto, $quantita, $data, $id);
         mysqli_stmt_execute($stmt);
@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Modifica Ordine</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 
 <body>
@@ -68,12 +69,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="mb-3">
                 <label>Data</label>
-                <input name="data" type="date" class="form-control" value="<?= htmlspecialchars($ordine['data']) ?>" required>
+                <input name="data" id="data" type="text" class="form-control" value="<?= date('Y-m-d', strtotime($ordine['data_di_ordine'])) ?>" required>
             </div>
             <button type="submit" class="btn btn-primary">Salva modifiche</button>
             <a href="ordini.php?id=<?= $contatto_id ?>" class="btn btn-secondary">Annulla</a>
         </form>
     </div>
+
+    <!-- Flatpickr JS + localizzazione italiana -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
+    <script>
+        flatpickr("#data", {
+            dateFormat: "Y-m-d",
+            locale: "it"
+        });
+    </script>
 </body>
 
 </html>

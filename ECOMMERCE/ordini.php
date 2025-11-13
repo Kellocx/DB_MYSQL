@@ -29,81 +29,81 @@ if (isset($_GET['success'])) {
 
 
 
-<<!DOCTYPE html>
-    <html lang="it">
+<!DOCTYPE html>
+<html lang="it">
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Ordini del contatto</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <title>Ordini del contatto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-    <body>
-        <div class="container mt-5">
-            <h2>Ordini del contatto #<?= $contatto_id ?></h2>
+<body>
+    <div class="container mt-5">
+        <h2>Ordini del contatto #<?= $contatto_id ?></h2>
 
-            <!-- Pulsante per aggiungere nuovo ordine -->
-            <a href="aggiungi_ordine.php?id=<?= $contatto_id ?>" class="btn btn-success mb-3">➕ Aggiungi nuovo ordine</a>
+        <!-- Pulsante per aggiungere nuovo ordine -->
+        <a href="aggiungi_ordine.php?id=<?= $contatto_id ?>" class="btn btn-success mb-3 ">➕ Aggiungi nuovo ordine</a>
 
-            <!-- Modale di conferma -->
-            <?php if ($messaggio): ?>
-                <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content bg-white">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="messaggioModalLabel">Operazione completata</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-                            </div>
-                            <div class="modal-body">
-                                <?= htmlspecialchars($messaggio) ?>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                            </div>
+        <!-- Modale di conferma -->
+        <?php if ($messaggio): ?>
+            <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="messaggioModalLabel">Operazione completata</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                        </div>
+                        <div class="modal-body">
+                            <?= htmlspecialchars($messaggio) ?>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
-
-            <!-- Tabella ordini -->
-            <?php if (count($ordini) > 0): ?>
-                <table class="table table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Prodotto</th>
-                            <th>Quantità</th>
-                            <th>Data</th>
-                            <th>Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($ordini as $ordine): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($ordine['prodotto']) ?></td>
-                                <td><?= htmlspecialchars($ordine['quantita']) ?></td>
-                                <td><?= htmlspecialchars($ordine['data']) ?></td>
-                                <td>
-                                    <a href="modifica_ordine.php?id=<?= $ordine['id'] ?>&contatto=<?= $contatto_id ?>" class="btn btn-sm btn-warning">✏️</a>
-                                    <a href="elimina_ordine.php?id=<?= $ordine['id'] ?>&contatto=<?= $contatto_id ?>" class="btn btn-sm btn-danger" onclick="return confirm('Sei sicuro di voler eliminare questo ordine?')">🗑️</a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p>Nessun ordine registrato per questo contatto.</p>
-            <?php endif; ?>
-
-            <a href="index.php" class="btn btn-secondary mt-3">Torna alla rubrica</a>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-        <?php if ($messaggio): ?>
-            <script>
-                const modal = new bootstrap.Modal(document.getElementById('messaggioModal'));
-                modal.show();
-            </script>
+            </div>
         <?php endif; ?>
-    </body>
 
-    </html>
+        <!-- Tabella ordini -->
+        <?php if (count($ordini) > 0): ?>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Prodotto</th>
+                        <th>Quantità</th>
+                        <th>Data</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($ordini as $ordine): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($ordine['prodotto']) ?></td>
+                            <td><?= htmlspecialchars($ordine['quantita']) ?></td>
+                            <td><?= htmlspecialchars($ordine['data_di_ordine']) ?></td>
+                            <td>
+                                <a href="modifica_ordine.php?id=<?= $ordine['id'] ?>&contatto=<?= $contatto_id ?>" class="btn btn-sm btn-outline-warning" title="modifica ordine">✏️</a>
+                                <a href="elimina_ordine.php?id=<?= $ordine['id'] ?>&contatto=<?= $contatto_id ?>" class="btn btn-sm btn-outline-danger" title="elimina ordine" onclick="return confirm('Sei sicuro di voler eliminare questo ordine?')">🗑️</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p>Nessun ordine registrato per questo contatto.</p>
+        <?php endif; ?>
+
+        <a href="index.php" class="btn btn-secondary mt-3">Torna alla rubrica</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <?php if ($messaggio): ?>
+        <script>
+            const modal = new bootstrap.Modal(document.getElementById('messaggioModal'));
+            modal.show();
+        </script>
+    <?php endif; ?>
+</body>
+
+</html>
