@@ -79,7 +79,7 @@ $result = mysqli_query($conn, "SELECT * FROM contatti"); // query per prendermi 
                                 🗑️
                             </button>
 
-                            <a href="ordini.php" class="btn btn-sm btn-info" title="aggiungi ordini">📦</a>
+                            <a href="ordini.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-info" title="aggiungi ordini">📦</a>
                         </td>
                     </tr>
 
