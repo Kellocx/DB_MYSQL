@@ -41,21 +41,21 @@ $result = mysqli_query($conn, "SELECT * FROM contatti"); // query per prendermi 
         <a href="aggiungi_contatto.php" class="btn btn-primary">Aggiungi contatto</a>
 
 
-        <table>
+        <table class=" table">
 
             <thead>
                 <tr>
                     <th>
-                        Nome :
+                        Nome 
                     </th>
                     <th>
-                        Telefono :
+                        Telefono 
                     </th>
                     <th>
-                        Email :
+                        Email 
                     </th>
                     <th>
-                        Actions :
+                        Actions 
                     </th>
 
                 </tr>
