@@ -9,3 +9,44 @@ CREATE TABLE ordini (
     FOREIGN KEY (contatto_id) REFERENCES contatti(id) ON DELETE CASCADE
 
 );
+
+PROGRAMMINO CHE GESTISCE UNA RUBRICA DI CONTATTI E ORDINI DEI CONTATTI
+
+-CREARE IL DB
+-CREARE TABELLA CONTATTI
+-CREARE TABELLA ORDINI
+
+
+--------------------TABELLA CONTATTI :
+
+CREATE TABLE contatti (
+	
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(30) NOT NULL,
+    telefono VARCHAR(30) NOT NULL,
+    email VARCHAR(30) NOT NULL
+    
+);
+
+--------------------TABELLA ORDINI :
+
+CREATE TABLE ordini (
+	
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    prodotto VARCHAR(50) NOT NULL,
+    quantita INT NOT NULL,
+    data_di_ordine DATE NOT NULL,
+    
+    contatto_id INT NOT NULL,
+    FOREIGN KEY (contatto_id) REFERENCES contatti(id) ON DELETE CASCADE
+
+);
+
+
+
+* ON DELETE CASCADE serve per eliminare tutti gli ordini collegati ad un ID specifico 
+                    nel caso venga CANCELLATO IL CONTATTO
+
+
+**LA RELAZIONE TRA LE DUE ENTITA SONO ->    1 a *     ( un contatto puo' avere piu ordini )
+                                      ->    * a 1     ( tanti ordini sono di un contatto )

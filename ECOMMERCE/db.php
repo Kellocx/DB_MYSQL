@@ -19,6 +19,3 @@ if (!$conn) {
     //se la connessione fallisce  stampa un messaggi di errore e termina lo script
     die("Connessione fallita: " . mysqli_connect());
 }
-
-?>
-

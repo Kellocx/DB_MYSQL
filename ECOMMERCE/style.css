@@ -1,0 +1,59 @@
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: coral;
+    margin: 0;
+    padding: 0;
+
+}
+
+.container{
+
+    max-width: 900px;
+    margin: auto;
+    background: whitesmoke;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgb(0,0,0, 0.1);
+
+}
+
+h1{
+    color: #333;
+}
+
+a.button{
+    display: inline-block;
+    padding: 8px 18px;
+    margin: 10px 0;
+    background: #007bff;
+    border-radius: 4px;
+    text-decoration: none;
+    color: whitesmoke;
+}
+
+a.button:hover{
+    background: #19406a;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+
+}
+
+table th{
+    background: #007bff;
+    color: whitesmoke;
+
+}
+
+
+.actions a{
+    margin-right: 10px;
+    text-decoration: none;
+    
+
+}
+
+
