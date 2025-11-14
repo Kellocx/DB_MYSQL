@@ -1,18 +1,43 @@
 <?php
 require 'db.php';
 
+// Validazione ID
 $contatto_id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : null;
 if (!$contatto_id) {
     die("ID contatto non valido.");
 }
 
+// Recupera il nome del contatto
+$nome_contatto = null;
+$sql_contatto = "SELECT nome FROM contatti WHERE id = ?";
+$stmt_contatto = mysqli_prepare($conn, $sql_contatto);
+mysqli_stmt_bind_param($stmt_contatto, "i", $contatto_id);
+mysqli_stmt_execute($stmt_contatto);
+mysqli_stmt_bind_result($stmt_contatto, $nome_contatto);
+mysqli_stmt_fetch($stmt_contatto);
+mysqli_stmt_close($stmt_contatto);
+
+if (!$nome_contatto) {
+    die("Contatto non trovato.");
+}
+
 // Recupera gli ordini associati al contatto
-$sql = "SELECT * FROM ordini WHERE contatto_id = ?";
+$ordini = [];
+$sql = "SELECT id, prodotto, quantita, data_di_ordine FROM ordini WHERE contatto_id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $contatto_id);
 mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$ordini = mysqli_fetch_all($result, MYSQLI_ASSOC);
+mysqli_stmt_bind_result($stmt, $ordine_id, $prodotto, $quantita, $data_di_ordine);
+
+while (mysqli_stmt_fetch($stmt)) {
+    $ordini[] = [
+        'id' => $ordine_id,
+        'prodotto' => $prodotto,
+        'quantita' => $quantita,
+        'data_di_ordine' => $data_di_ordine
+    ];
+}
+mysqli_stmt_close($stmt);
 
 // Messaggio di conferma
 $messaggio = '';
@@ -26,24 +51,21 @@ if (isset($_GET['success'])) {
     }
 }
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="it">
 
 <head>
     <meta charset="UTF-8">
-    <title>Ordini del contatto</title>
+    <title>Ordini di <?= htmlspecialchars($nome_contatto) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="container mt-5">
-        <h2>Ordini del contatto #<?= $contatto_id ?></h2>
+        <h2>Ordini di <?= htmlspecialchars($nome_contatto) ?></h2>
 
         <!-- Pulsante per aggiungere nuovo ordine -->
-        <a href="aggiungi_ordine.php?id=<?= $contatto_id ?>" class="btn btn-success mb-3 ">➕ Aggiungi nuovo ordine</a>
+        <a href="aggiungi_ordine.php?id=<?= $contatto_id ?>" class="btn btn-success mb-3">➕ Aggiungi nuovo ordine</a>
 
         <!-- Modale di conferma -->
         <?php if ($messaggio): ?>

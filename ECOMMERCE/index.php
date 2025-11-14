@@ -71,13 +71,13 @@ $result = mysqli_query($conn, "SELECT * FROM contatti"); // query per prendermi 
                         <td><?= htmlspecialchars($row['nome']) ?></td>
                         <td><?= htmlspecialchars($row['telefono']) ?></td>
                         <td><?= htmlspecialchars($row['email']) ?></td>
-                        <td class="actions">
+                        <td class="actions justify-content-end">
                             <a href="modifica_contatto.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning" title="modifica contatto">🖊️</a>
 
                             <!-- Bottone che apre il modale -->
-                            <button type="button" class="btn btn-sm btn-outline-danger" title="elimina contatto" data-bs-toggle="modal" data-bs-target="#confermaElimina<?= $row['id'] ?> ">
-                                🗑️
-                            </button>
+                            <a href="elimina_contatto.php?id=<?= $row['id'] ?>" data-bs-toggle="modal" data-bs-target="#confermaElimina<?= $row['id'] ?> " title="elimina contatto">
+                                <span class="border border-warning rounded  m-1 p-1">❌</span>
+                            </a>
 
                             <a href="ordini.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-info" title="aggiungi ordini">📦</a>
                         </td>
