@@ -1,0 +1,222 @@
+// COMANDI MYSQL
+
+
+//-----------------------------CREAZIONE  DATABASE
+
+
+CREATE 'nome_db';
+
+
+//-------------USARE O SCEGLIERE IL DATABASE----------
+
+USE 'nome_db;
+
+
+//----------------------CREARE UNA TABELLA----------------------
+
+CREATE TABLE nome_tabella (
+
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(10) NOT NULL,          -> NOT NULL vuol dire obbligatorio
+    cognome VARCHAR(10), 
+    eta INT
+
+);
+
+
+//---------------------INSERIMENTO DATI IN UNA TABELLA--------------
+
+
+INSERT INTO nome_tabella (nome, cognome, eta)
+
+VALUES ('Mario', 'Rossi', 35),
+       ('Luigi', 'Bianchi', 46),
+       ('Pippo', 'Paperino', 67);
+
+
+
+//---------------------------LEGGERE I DATI----------------------------
+
+
+SELECT * FROM nome_tabella WHERE eta >= 18;
+SELECT * FROM nome_tabella WHERE nome = 'Mario';
+
+
+//--------------------------AGGIORNARE I DATI----------------------------
+
+UPDATE nome_tabella
+SET eta = 36
+WHERE nome = 'Mario';
+
+
+
+//---------------------------CANCELLARE UN DATO----------------------------
+
+
+DELETE FROM nome_tabella
+
+WHERE nome = 'Mario';
+
+
+
+//----------------------------------CANCELLARE DATABASE------------------------------
+
+
+DROP DATABASE nome_database;
+
+
+
+//------------------------------------RINOMINARE TABELLA------------------------------
+
+
+RENAME TABLE nome_tabella TO nuovo_nome_tabella;
+
+ALTER TABLE nome_vecchio TO nuovo_nome;
+
+
+
+
+
+//------------------------------------------------------------ESERCIZI QUERY
+
+
+
+//---------------------------------------------------mostrare tutti i prodotti disponibili
+
+
+    SELECT * FROM `prodotti` WHERE disponibile = TRUE;
+
+
+//------------------------------------elencare tutti i prodotti di una categoria a vs. scelta
+
+
+    SELECT * FROM `prodotti` WHERE categoria = 'INFORMATICA';
+
+
+//--------------------------MOSTRARE IL NOME E IL PREZZO E LA QUANTITà DEI PRODOTTI CON QUANTITà MINORE DI 5
+
+
+    SELECT nome, prezzo, quantita FROM prodotti WHERE quantita < 5;
+
+
+//-----------------------------ORDINO TUTTI I PRODOTTI PER PREZZO DECRESCENTE
+
+
+    SELECT * FROM prodotti ORDER BY prezzo DESC;                               ASC( è il contrario)
+
+
+//------------------------TROVARE I PRODOTTI CON PREZZO COMPRESO TRA UN RANGE DI PREZZI
+
+
+    SELECT * FROM prodotti WHERE prezzo BETWEEN 100 AND 900; 
+
+
+//---------------------------CALCOLARE il prezzo MEDIO PER categoria
+
+
+    SELECT categoria, AVG(prezzo) AS prezzo_medio               AVG-> average( la media )
+    FROM prodotti
+    GROUP BY categoria;
+
+
+//---------------------------AGGIORNARE LA QUANTITA  AD UN PRODOTTO ESISTENTE----------
+
+
+    UPDATE prodotti 
+    SET quantita = quantita +5
+    WHERE id = 4;
+
+
+//--------------------------------------CANCELLO PRODOTTO-----------------------------------
+
+
+    DELETE FROM prodotti WHERE id = 6;
+
+
+
+//---------------------------------------AGGIUNGERE COLONNA A TABELLA-----------------------------
+
+
+    ALTER TABLE nome_tabella
+    ADD COLUMN nome_colonna tipo_di_dato;
+
+    es.: ALTER TABLE appartamenti
+         ADD COLUMN giardino BOOLEAN;
+
+
+
+
+//---------------------------------------ELIMINARE COLONNA DA TABELLA-----------------------------
+
+    ALTER TABLE nome_tabella
+    DROP COLUMN nome_colonna;
+
+    es.: ALTER TABLE appartamenti
+         DROP COLUMN giardino;
+
+
+
+
+
+
+
+
+
+
+// ESERCIZIO APPARTAMENTI
+
+
+    CREARE DB APPARTAMENTI, 
+
+    CREARE TABELLA, 
+
+        E INSERIRE : ID , INTERNO, PIANO, METRI_QUADRI, PROPRIETARIO 
+
+            //INSERIMENTO DI DATI , POPOLARLO
+
+            //MOSTRARE TUTTI GLI APPARTAMENTI 
+                SELECT * FROM appartamenti;
+
+            //MOSTRARE GLI APPARTEMENTI AL 2° PIANO
+                SELECT * FROM appartamenti WHERE piano = 2;
+
+            //MOSTRARE APPARTAMENTI CON PIU DI 80MQ2
+                SELECT * FROM `appartamenti` WHERE metri_quadri > 80;
+
+            //MOSTRARE SOLO INTERNO E PROPRIETARIO
+                SELECT interno, proprietario FROM appartamenti;
+
+            //ORDINARE GLI APPARTAMENTI PER METRI_QUADRI DAL PIU GRANDE AL PIU PICCOLO (DESC)
+                SELECT * FROM appartamenti ORDER BY metri_quadri DESC;
+
+            //CALCOLA LA MEDIA DEI METRI_QUADRI
+                SELECT AVG(metri_quadri) AS media_mq FROM appartamenti;
+            
+          
+
+            //AGGIORNAMENTO : AGGIUNGERE 5 MQ2 A TUTTI GLI APPARTAMENTI DEL PIANO 1
+                UPDATE appartamenti
+                SET metri_quadri = metri_quadri + 5
+                WHERE piano = 1;
+
+
+
+
+            //CANCELLARE UN DATO ( UN INTERNO )
+
+            //CANCELLARE APPARTAMENTI SOTTO GLI 80MQ2
+
+
+
+
+
+///////////////////////////////////////////////////--- FOREIGN KEY --- ///////////////////////////////////////////
+
+
+
+table appartamenti                              table inquilini                     CREO UNA "FOREIGN KEY" CHE COLLEGA LE DUE TABELLA
+
+ID INT AUTO_INCREMENT PRIMARY KEY               ID INT AUTO_INCREMENT PRIMARY KEY 
+
+                                                id_appartamento INT 
+                                                FOREIGN KEY (id_appartamento) REFERENCES appartamenti(id);
