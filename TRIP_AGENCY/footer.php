@@ -1,12 +1,8 @@
-</main>
+</main> <!-- chiusura main di header-->
 
-<footer class="text-white text-center mt-a5 p-5 " style="background-color: #0081a7">
-    <small>©Trip Agency <?php echo date("Y"); ?></small>
+<footer class="text-white text-center mt-5 p-5" style="background-color: #0081a7">
 
-
-
-
-
+    <small>© Trip-Agency <?php echo date("Y"); ?></small>
 
 
 </footer>
