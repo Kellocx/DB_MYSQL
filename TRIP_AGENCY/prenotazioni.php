@@ -1,8 +1,9 @@
 <?php
 require 'db.php';
+require 'header.php';
 mysqli_set_charset($conn, 'utf8mb4');
 
-// Se il form è stato inviato
+// Inserimento prenotazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_cliente      = (int)$_POST['id_cliente'];
     $id_destinazione = (int)$_POST['id_destinazione'];
@@ -13,22 +14,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $sql = "INSERT INTO prenotazioni (id_cliente, id_destinazione, dataprenotazione, acconto, numero_persone, assicurazione)
             VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "iisdis", $id_cliente, $id_destinazione, $dataprenotazione, $acconto, $numero_persone, $assicurazione);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iisdis", $id_cliente, $id_destinazione, $dataprenotazione, $acconto, $numero_persone, $assicurazione);
 
-    header("Location: prenotazioni.php?success=aggiunto");
-    exit;
+    if ($stmt->execute()) {
+        header("Location: prenotazioni.php?success=aggiunto");
+        exit;
+    } else {
+        header("Location: prenotazioni.php?error=insertfail");
+        exit;
+    }
+    $stmt->close();
 }
 
-// Messaggio di conferma
+// Messaggi da query string
 $messaggio = '';
-if (isset($_GET['success']) && $_GET['success'] === 'aggiunto') {
-    $messaggio = 'Prenotazione aggiunta con successo!';
+$tipoMessaggio = '';
+if (isset($_GET['success'])) {
+    if ($_GET['success'] === 'aggiunto') {
+        $messaggio = 'Prenotazione aggiunta con successo!';
+        $tipoMessaggio = 'success';
+    } elseif ($_GET['success'] === 'modificato') {
+        $messaggio = 'Prenotazione modificata con successo!';
+        $tipoMessaggio = 'success';
+    } elseif ($_GET['success'] === 'eliminato') {
+        $messaggio = 'Prenotazione eliminata con successo!';
+        $tipoMessaggio = 'success';
+    }
+}
+if (isset($_GET['error'])) {
+    if ($_GET['error'] === 'insertfail') {
+        $messaggio = 'Errore durante l\'inserimento della prenotazione.';
+        $tipoMessaggio = 'danger';
+    } elseif ($_GET['error'] === 'notfound') {
+        $messaggio = 'Prenotazione non trovata.';
+        $tipoMessaggio = 'danger';
+    } elseif ($_GET['error'] === 'invalid') {
+        $messaggio = 'ID prenotazione non valido.';
+        $tipoMessaggio = 'danger';
+    }
 }
 
-// Recupera lista clienti (con cognome)
+// Recupera lista clienti
 $clienti = [];
 $sql_clienti = "SELECT id, cognome, nome FROM clienti ORDER BY cognome ASC";
 $res_clienti = mysqli_query($conn, $sql_clienti);
@@ -45,60 +72,145 @@ while ($row = mysqli_fetch_assoc($res_dest)) {
     $destinazioni[] = $row;
 }
 mysqli_free_result($res_dest);
+
+// Recupera tutte le prenotazioni
+$prenotazioni = [];
+$sql_pren = "SELECT p.id, c.nome, c.cognome, d.citta, p.dataprenotazione, p.acconto, p.numero_persone, p.assicurazione
+             FROM prenotazioni p
+             JOIN clienti c ON p.id_cliente = c.id
+             JOIN destinazioni d ON p.id_destinazione = d.id
+             ORDER BY p.dataprenotazione DESC";
+$res_pren = mysqli_query($conn, $sql_pren);
+while ($row = mysqli_fetch_assoc($res_pren)) {
+    $prenotazioni[] = $row;
+}
+mysqli_free_result($res_pren);
+
+
 ?>
-<?php include 'header.php'; ?>
 
-<body>
-    <div class="container mt-5">
-        <h2>Prenotazioni Clienti</h2>
+<div class="container mt-5">
+    <h2>Prenotazioni Clienti</h2>
 
-        <?php if ($messaggio): ?>
-            <div class="alert alert-success"><?= htmlspecialchars($messaggio) ?></div>
-        <?php endif; ?>
-
-        <form method="post">
-            <div class="mb-3">
-                <label class="form-label">Cliente</label>
-                <select name="id_cliente" class="form-select" required>
-                    <option value="">-- Seleziona cliente --</option>
-                    <?php foreach ($clienti as $c): ?>
-                        <option value="<?= $c['id'] ?>">
-                            <?= htmlspecialchars($c['cognome'] . " " . $c['nome'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Destinazione</label>
-                <select name="id_destinazione" class="form-select" required>
-                    <option value="">-- Seleziona destinazione --</option>
-                    <?php foreach ($destinazioni as $d): ?>
-                        <option value="<?= $d['id'] ?>">
-                            <?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Data Prenotazione</label>
-                <input type="date" name="dataprenotazione" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Acconto (€)</label>
-                <input type="number" step="0.01" name="acconto" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Numero Persone</label>
-                <input type="number" name="numero_persone" class="form-control" required>
-            </div>
-            <div class="form-check mb-3">
-                <input type="checkbox" name="assicurazione" class="form-check-input" id="assicurazione">
-                <label class="form-check-label" for="assicurazione">Assicurazione inclusa</label>
-            </div>
-            <div class="mb-3">
-                <button type="submit" class="btn btn-primary">Salva Prenotazione</button>
-                <a href="index.php" class="btn btn-secondary">Annulla</a>
-            </div>
-        </form>
+    <!-- Form inserimento -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Cliente</label>
+                    <select name="id_cliente" class="form-select" required>
+                        <option value="">-- Seleziona cliente --</option>
+                        <?php foreach ($clienti as $c): ?>
+                            <option value="<?= $c['id'] ?>">
+                                <?= htmlspecialchars($c['cognome'] . " " . $c['nome'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Destinazione</label>
+                    <select name="id_destinazione" class="form-select" required>
+                        <option value="">-- Seleziona destinazione --</option>
+                        <?php foreach ($destinazioni as $d): ?>
+                            <option value="<?= $d['id'] ?>">
+                                <?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Data Prenotazione</label>
+                    <input type="date" name="dataprenotazione" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Acconto (€)</label>
+                    <input type="number" step="0.01" name="acconto" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Numero Persone</label>
+                    <input type="number" name="numero_persone" class="form-control" required>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="assicurazione" class="form-check-input" id="assicurazione">
+                    <label class="form-check-label" for="assicurazione">Assicurazione inclusa</label>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Salva Prenotazione</button>
+                    <a href="index.php" class="btn btn-secondary">Annulla</a>
+                </div>
+            </form>
+        </div>
     </div>
-    <?php include 'footer.php'; ?>
+
+    <!-- Tabella prenotazioni -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Destinazione</th>
+                <th>Data</th>
+                <th>Acconto (€)</th>
+                <th>Persone</th>
+                <th>Assicurazione</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($prenotazioni as $p): ?>
+                <tr>
+                    <td><?= htmlspecialchars($p['id']) ?></td>
+                    <td><?= htmlspecialchars($p['cognome'] . " " . $p['nome']) ?></td>
+                    <td><?= htmlspecialchars($p['citta']) ?></td>
+                    <td><?= htmlspecialchars($p['dataprenotazione']) ?></td>
+                    <td><?= htmlspecialchars($p['acconto']) ?></td>
+                    <td><?= htmlspecialchars($p['numero_persone']) ?></td>
+                    <td><?= $p['assicurazione'] ? 'Sì' : 'No' ?></td>
+                    <td>
+                        <a href="modifica_prenotazione.php?id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-warning">✏️</a>
+                        <a href="elimina_prenotazioni.php?id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questa prenotazione?')">🗑️</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modale Bootstrap -->
+<?php if (!empty($messaggio)): ?>
+    <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messaggioModalLabel">Esito operazione</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-<?= $tipoMessaggio ?>">
+                    <?= htmlspecialchars($messaggio) ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<?php if (!empty($messaggio)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalEl = document.getElementById('messaggioModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+                // Dopo chiusura modale → redirect per pulire la query string
+                modalEl.addEventListener('hidden.bs.modal', () => {
+                    window.location.href = 'prenotazioni.php';
+                });
+            }
+        });
+    </script>
+<?php endif; ?>
+
+<?php include 'footer.php'; ?>
