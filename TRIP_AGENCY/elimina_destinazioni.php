@@ -2,8 +2,8 @@
 require 'db.php';
 mysqli_set_charset($conn, 'utf8mb4');
 
-$id_destinazione = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : null;
-if (!$id_destinazione) {
+$id_citta = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : null;
+if (!$id_citta) {
     header("Location: destinazioni.php?error=invalid");
     exit;
 }
@@ -11,7 +11,7 @@ if (!$id_destinazione) {
 // Recupera dati destinazione per mostrarli nella conferma
 $sql = "SELECT citta, paese FROM destinazioni WHERE id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id_destinazione);
+$stmt->bind_param("i", $id_citta);
 $stmt->execute();
 $stmt->bind_result($citta, $paese);
 if (!$stmt->fetch()) {
@@ -25,7 +25,7 @@ $stmt->close();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sql = "DELETE FROM destinazioni WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id_destinazione);
+    $stmt->bind_param("i", $id_citta);
 
     if ($stmt->execute()) {
         $stmt->close();

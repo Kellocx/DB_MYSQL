@@ -104,7 +104,7 @@ include 'header.php';
                     <td><?= htmlspecialchars($d['data_ritorno']) ?></td>
                     <td>
                         <a href="modifica_destinazione.php?id=<?= (int)$d['id'] ?>" class="btn btn-sm btn-warning">✏️</a>
-                        <a href="elimina_destinazione.php?id=<?= (int)$d['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
+                        <a href="elimina_destinazioni.php?id=<?= (int)$d['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
