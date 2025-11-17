@@ -8,23 +8,25 @@ $tipoMessaggio = '';
 
 $cliente_id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : null;
 if (!$cliente_id) {
-    die("ID cliente non valido.");
-    // ID non valido: torna alla lista con errore
     header('Location: clienti.php?error=invalid');
     exit;
 }
 
-// Recupera dati cliente
+// Recupera dati cliente per precompilare il form
 $sql = "SELECT nome, cognome, data_nascita, email, telefono, nazione, codice_fiscale, documento 
         FROM clienti WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $cliente_id);
 $stmt->execute();
 $stmt->bind_result($nome, $cognome, $data_nascita, $email, $telefono, $nazione, $codice_fiscale, $documento);
-$stmt->fetch();
+if (!$stmt->fetch()) {
+    $stmt->close();
+    header('Location: clienti.php?error=notfound');
+    exit;
+}
 $stmt->close();
 
-// Se arriva POST: aggiorna e redirect
+// Se arriva POST: aggiorna
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $nome           = $_POST['nome'] ?? '';
     $cognome        = $_POST['cognome'] ?? '';
@@ -42,81 +44,77 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("ssssssssi", $nome, $cognome, $data_nascita, $email, $telefono, $nazione, $codice_fiscale, $documento, $cliente_id);
 
     if ($stmt->execute()) {
-        // Redirect alla lista con messaggio di successo
-        header('Location: clienti.php?success=modificato');
-        exit;
+        $messaggio = "Anagrafica cliente modificata con successo!";
+        $tipoMessaggio = "success";
     } else {
-        // Redirect alla lista con errore
-        header('Location: clienti.php?error=updatefail');
-        exit;
+        $messaggio = "Errore: " . htmlspecialchars($stmt->error, ENT_QUOTES, 'UTF-8');
+        $tipoMessaggio = "danger";
     }
-}
-
-// Recupera dati cliente per precompilare il form (solo GET)
-$sql = "SELECT nome, cognome, data_nascita, email, telefono, nazione, codice_fiscale, documento
-        FROM clienti WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $cliente_id);
-$stmt->execute();
-$stmt->bind_result($nome, $cognome, $data_nascita, $email, $telefono, $nazione, $codice_fiscale, $documento);
-if (!$stmt->fetch()) {
-    // Cliente non trovato → torna alla lista
     $stmt->close();
-    header('Location: clienti.php?error=notfound');
-    exit;
 }
-$stmt->close();
 ?>
-
-<!DOCTYPE html>
-<html lang="it">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Modifica Cliente</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
 
 <body>
     <div class="container mt-5">
         <h2>Modifica Cliente</h2>
         <form method="post">
-            <div class="mb-3"><label>Nome</label><input type="text" name="nome" class="form-control" value="<?= htmlspecialchars($nome) ?>" required></div>
-            <div class="mb-3"><label>Cognome</label><input type="text" name="cognome" class="form-control" value="<?= htmlspecialchars($cognome) ?>" required></div>
-            <div class="mb-3"><label>Data di nascita</label><input type="date" name="data_nascita" class="form-control" value="<?= htmlspecialchars($data_nascita) ?>" required></div>
-            <div class="mb-3"><label>Email</label><input type="email" name="email" class="form-control" value="<?= htmlspecialchars($email) ?>" required></div>
-            <div class="mb-3"><label>Telefono</label><input type="text" name="telefono" class="form-control" value="<?= htmlspecialchars($telefono) ?>" required></div>
-            <div class="mb-3"><label>Nazione</label><input type="text" name="nazione" class="form-control" value="<?= htmlspecialchars($nazione) ?>" required></div>
-            <div class="mb-3"><label>Codice Fiscale</label><input type="text" name="codice_fiscale" class="form-control" value="<?= htmlspecialchars($codice_fiscale) ?>" required></div>
-            <div class="mb-3"><label>Documento</label><input type="text" name="documento" class="form-control" value="<?= htmlspecialchars($documento) ?>"></div>
+            <div class="mb-3">
+                <label>Nome</label>
+                <input type="text" name="nome" class="form-control"
+                    value="<?= htmlspecialchars($nome) ?>" required>
+            </div>
+            <div class="mb-3"><label>Cognome</label><input type="text" name="cognome" class="form-control"
+                    value="<?= htmlspecialchars($cognome) ?>" required></div>
+            <div class="mb-3"><label>Data di nascita</label><input type="date" name="data_nascita" class="form-control"
+                    value="<?= htmlspecialchars($data_nascita) ?>" required></div>
+            <div class="mb-3"><label>Email</label><input type="email" name="email" class="form-control"
+                    value="<?= htmlspecialchars($email) ?>" required></div>
+            <div class="mb-3"><label>Telefono</label><input type="text" name="telefono" class="form-control"
+                    value="<?= htmlspecialchars($telefono) ?>" required></div>
+            <div class="mb-3"><label>Nazione</label><input type="text" name="nazione" class="form-control"
+                    value="<?= htmlspecialchars($nazione) ?>" required></div>
+            <div class="mb-3"><label>Codice Fiscale</label><input type="text" name="codice_fiscale" class="form-control"
+                    value="<?= htmlspecialchars($codice_fiscale) ?>" required></div>
+            <div class="mb-3"><label>Documento</label><input type="text" name="documento" class="form-control"
+                    value="<?= htmlspecialchars($documento) ?>"></div>
             <button type="submit" class="btn btn-warning">Aggiorna</button>
-            <a href="index.php" class="btn btn-secondary">Annulla</a>
+            <a href="clienti.php" class="btn btn-secondary">Annulla</a>
         </form>
     </div>
 
-    <!-- Modale -->
-    <?php if ($messaggio): ?>
-        <div class="modal fade" id="messaggioModal" tabindex="-1">
+    <!-- Modale Bootstrap -->
+    <?php if (!empty($messaggio)): ?>
+        <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content bg-white">
                     <div class="modal-header">
-                        <h5 class="modal-title">Esito operazione</h5>
+                        <h5 class="modal-title" id="messaggioModalLabel">Esito operazione</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body text-<?= $tipoMessaggio === 'success' ? 'success' : 'danger' ?>">
                         <?= htmlspecialchars($messaggio) ?>
                     </div>
-                    <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
                 </div>
             </div>
         </div>
     <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <?php if ($messaggio): ?>
+    <?php if (!empty($messaggio)): ?>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                new bootstrap.Modal(document.getElementById('messaggioModal')).show();
+                const modalEl = document.getElementById('messaggioModal');
+                if (modalEl) {
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                    // Dopo chiusura modale → redirect a clienti.php
+                    modalEl.addEventListener('hidden.bs.modal', () => {
+                        window.location.href = 'clienti.php';
+                    });
+                }
             });
         </script>
     <?php endif; ?>
