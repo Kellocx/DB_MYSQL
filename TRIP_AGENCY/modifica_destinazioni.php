@@ -79,8 +79,41 @@ include 'header.php';
     </form>
 </div>
 
+<!-- Modale Bootstrap -->
 <?php if (!empty($messaggio)): ?>
-    <div class="alert alert-<?= $tipoMessaggio ?> mt-3"><?= htmlspecialchars($messaggio) ?></div>
+    <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messaggioModalLabel">Esito operazione</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-<?= $tipoMessaggio ?>">
+                    <?= htmlspecialchars($messaggio) ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<?php if (!empty($messaggio)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalEl = document.getElementById('messaggioModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+                // Dopo chiusura modale → redirect per pulire la query string
+                modalEl.addEventListener('hidden.bs.modal', () => {
+                    window.location.href = 'destinazioni.php';
+                });
+            }
+        });
+    </script>
 <?php endif; ?>
 
 <?php include 'footer.php'; ?>
