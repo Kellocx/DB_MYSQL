@@ -1,6 +1,6 @@
 <?php
-    include 'header.php'; 
-    include 'db.php'; 
+include 'header.php';
+include 'db.php';
 mysqli_set_charset($conn, 'utf8mb4');
 
 // Impaginazione
@@ -229,6 +229,5 @@ $result = $conn->query("SELECT * FROM clienti ORDER BY cognome ASC LIMIT $perPag
                 });
             </script>
         <?php endif; ?>
-
     <?php endif; ?>
-
+    <?php include 'footer' ?>;
