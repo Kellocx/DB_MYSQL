@@ -1,5 +1,6 @@
 <?php
-include 'db.php';
+    include 'header.php'; 
+    include 'db.php'; 
 mysqli_set_charset($conn, 'utf8mb4');
 
 // Impaginazione
@@ -79,13 +80,7 @@ $result = $conn->query("SELECT * FROM clienti ORDER BY cognome ASC LIMIT $perPag
 <!DOCTYPE html>
 <html lang="it">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Clienti</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+
 
 <body>
     <div class="container mt-5">
@@ -126,7 +121,7 @@ $result = $conn->query("SELECT * FROM clienti ORDER BY cognome ASC LIMIT $perPag
                         </div>
                         <div class="col-md-6">
                             <label class="fw-semibold">Documento:</label>
-                            <input type="text" name="documento" class="form-control" placeholder="Es. tipo/numero documento">
+                            <input type="file" name="documento" class="form-control" placeholder="Es. tipo/numero documento">
                         </div>
                         <div class="col-12">
                             <button class="btn btn-success mt-3" type="submit">Salva</button>
@@ -236,6 +231,4 @@ $result = $conn->query("SELECT * FROM clienti ORDER BY cognome ASC LIMIT $perPag
         <?php endif; ?>
 
     <?php endif; ?>
-</body>
 
-</html>
