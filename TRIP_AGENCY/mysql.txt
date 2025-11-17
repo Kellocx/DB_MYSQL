@@ -23,6 +23,7 @@ CREATE TABLE clienti (
     nome VARCHAR(30) NOT NULL,
     cognome VARCHAR(30) NOT NULL,
     telefono VARCHAR(30) NOT NULL,
+    email VARCHAR (30) NOT NULL,
     nazione VARCHAR(30) NOT NULL,
     codice_fiscale VARCHAR(16) NOT NULL,     
     documento VARCHAR(30) NOT NULL
