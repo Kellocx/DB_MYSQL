@@ -55,6 +55,9 @@ if (isset($_GET['error'])) {
     }
 }
 
+
+
+
 // Recupera lista clienti
 $clienti = [];
 $sql_clienti = "SELECT id, cognome, nome FROM clienti ORDER BY cognome ASC";
@@ -168,7 +171,8 @@ mysqli_free_result($res_pren);
                     <td><?= $p['assicurazione'] ? 'Sì' : 'No' ?></td>
                     <td>
                         <a href="modifica_prenotazione.php?id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-warning">✏️</a>
-                        <a href="elimina_prenotazioni.php?id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questa prenotazione?')">🗑️</a>
+                        <a class="btn btn-sm btn-danger" href="?elimina=<?= htmlspecialchars($p['id']) ?>" onclick="return confirm('Eliminare questa prenotazione?')">🗑️</a>
+                       
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -196,21 +200,60 @@ mysqli_free_result($res_pren);
     </div>
 <?php endif; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<?php
+
+// CANCELLAZIONE CLIENTE
+if (isset($_GET['elimina'])) {
+
+    $id = intval($_GET['elimina']);
+    $conn->query("DELETE FROM prenotazioni WHERE id = $id");
+
+    // Messaggio di conferma
+    $messaggio = "Cliente eliminato con successo!";
+    $tipoMessaggio = "success";
+}
+?>
 <?php if (!empty($messaggio)): ?>
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-<?php echo $tipoMessaggio; ?>">
+                    <h5 class="modal-title" id="deleteModalLabel">Notifica</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                </div>
+                <div class="modal-body">
+                    <?php echo $messaggio; ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const modalEl = document.getElementById('messaggioModal');
-            if (modalEl) {
-                const modal = new bootstrap.Modal(modalEl);
-                modal.show();
-                // Dopo chiusura modale → redirect per pulire la query string
-                modalEl.addEventListener('hidden.bs.modal', () => {
-                    window.location.href = 'prenotazioni.php';
-                });
-            }
+        document.addEventListener("DOMContentLoaded", function() {
+            var myModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+            myModal.show();
         });
     </script>
 <?php endif; ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <?php include 'footer.php'; ?>
