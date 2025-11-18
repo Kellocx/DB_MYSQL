@@ -220,3 +220,9 @@ ID INT AUTO_INCREMENT PRIMARY KEY               ID INT AUTO_INCREMENT PRIMARY KE
 
                                                 id_appartamento INT 
                                                 FOREIGN KEY (id_appartamento) REFERENCES appartamenti(id);
+
+
+                                                ------------ POSTI DISPONIBILI ------------
+
+
+                                                $stmt->bind_param("ssdssi", $_POST['citta'], $_POST['paese'], $_POST['prezzo'], $_POST['data_partenza'], $_POST['data_ritorno'], $_POST['posti_disponibili']);

@@ -7,20 +7,21 @@ $messaggio = '';
 $tipoMessaggio = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $citta         = trim($_POST['citta'] ?? '');
-    $paese         = trim($_POST['paese'] ?? '');
-    $prezzo        = (float)($_POST['prezzo'] ?? 0);
-    $data_partenza = $_POST['data_partenza'] ?? '';
-    $data_ritorno  = $_POST['data_ritorno'] ?? '';
+    $citta            = trim($_POST['citta'] ?? '');
+    $paese            = trim($_POST['paese'] ?? '');
+    $prezzo           = (float)($_POST['prezzo'] ?? 0);
+    $data_partenza    = $_POST['data_partenza'] ?? '';
+    $data_ritorno     = $_POST['data_ritorno'] ?? '';
+    $posti_disponibili = (int)($_POST['posti_disponibili'] ?? 0);
 
-    if (empty($citta) || empty($paese) || $prezzo <= 0 || empty($data_partenza) || empty($data_ritorno)) {
+    if (empty($citta) || empty($paese) || $prezzo <= 0 || empty($data_partenza) || empty($data_ritorno) || $posti_disponibili <= 0) {
         $messaggio = 'Tutti i campi devono essere compilati correttamente.';
         $tipoMessaggio = 'danger';
     } else {
-        $sql = "INSERT INTO destinazioni (citta, paese, prezzo, data_partenza, data_ritorno) 
-                VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO destinazioni (citta, paese, prezzo, data_partenza, data_ritorno, posti_disponibili) 
+                VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssdss", $citta, $paese, $prezzo, $data_partenza, $data_ritorno);
+        $stmt->bind_param("ssdssi", $citta, $paese, $prezzo, $data_partenza, $data_ritorno, $posti_disponibili);
 
         if ($stmt->execute()) {
             $messaggio = 'Destinazione aggiunta con successo!';
@@ -35,7 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Recupera tutte le destinazioni
 $destinazioni = [];
-$sql_dest = "SELECT id, citta, paese, prezzo, data_partenza, data_ritorno FROM destinazioni ORDER BY citta ASC";
+$sql_dest = "SELECT id, citta, paese, prezzo, data_partenza, data_ritorno, posti_disponibili 
+             FROM destinazioni ORDER BY citta ASC";
 $res_dest = mysqli_query($conn, $sql_dest);
 while ($row = mysqli_fetch_assoc($res_dest)) {
     $destinazioni[] = $row;
@@ -74,6 +76,10 @@ include 'header.php';
             <label for="data_ritorno" class="form-label">Data di Ritorno</label>
             <input type="date" class="form-control" id="data_ritorno" name="data_ritorno" required>
         </div>
+        <div class="mb-3">
+            <label for="posti_disponibili" class="form-label">Posti Disponibili</label>
+            <input type="number" class="form-control" id="posti_disponibili" name="posti_disponibili" min="1" required>
+        </div>
         <button type="submit" class="btn btn-primary">Salva</button>
         <a href="index.php" class="btn btn-secondary">Torna alla home</a>
     </form>
@@ -90,6 +96,7 @@ include 'header.php';
                 <th>Prezzo (€)</th>
                 <th>Data Partenza</th>
                 <th>Data Ritorno</th>
+                <th>Posti Disponibili</th>
                 <th>Azioni</th>
             </tr>
         </thead>
@@ -102,9 +109,9 @@ include 'header.php';
                     <td><?= htmlspecialchars($d['prezzo']) ?></td>
                     <td><?= htmlspecialchars($d['data_partenza']) ?></td>
                     <td><?= htmlspecialchars($d['data_ritorno']) ?></td>
+                    <td><?= htmlspecialchars($d['posti_disponibili']) ?></td>
                     <td>
                         <a href="modifica_destinazioni.php?id=<?= (int)$d['id'] ?>" class="btn btn-sm btn-warning">✏️</a>
-
                         <a href="elimina_destinazioni.php?id=<?= (int)$d['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
                     </td>
                 </tr>

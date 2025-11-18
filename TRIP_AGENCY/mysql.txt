@@ -27,6 +27,7 @@ CREATE TABLE clienti (
     nazione VARCHAR(30) NOT NULL,
     codice_fiscale VARCHAR(16) NOT NULL,     
     documento VARCHAR(30) NOT NULL
+
 );
 
 
@@ -38,6 +39,7 @@ CREATE TABLE destinazioni (
     prezzo DECIMAL(10,2) NOT NULL,             
     data_partenza DATE NOT NULL,
     data_ritorno DATE NOT NULL
+    posti_disponibili INT NOT NULL;
 );
 
 

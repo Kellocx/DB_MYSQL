@@ -12,11 +12,12 @@ if (!$id_destinazione) {
 }
 
 // Recupera dati destinazione
-$sql = "SELECT citta, paese, prezzo, data_partenza, data_ritorno FROM destinazioni WHERE id = ?";
+$sql = "SELECT citta, paese, prezzo, data_partenza, data_ritorno, posti_disponibili 
+        FROM destinazioni WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_destinazione);
 $stmt->execute();
-$stmt->bind_result($citta, $paese, $prezzo, $data_partenza, $data_ritorno);
+$stmt->bind_result($citta, $paese, $prezzo, $data_partenza, $data_ritorno, $posti_disponibili);
 if (!$stmt->fetch()) {
     $stmt->close();
     header("Location: destinazioni.php?error=notfound");
@@ -26,17 +27,18 @@ $stmt->close();
 
 // Se arriva POST: aggiorna
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $citta         = trim($_POST['citta'] ?? '');
-    $paese         = trim($_POST['paese'] ?? '');
-    $prezzo        = (float)($_POST['prezzo'] ?? 0);
-    $data_partenza = $_POST['data_partenza'] ?? '';
-    $data_ritorno  = $_POST['data_ritorno'] ?? '';
+    $citta             = trim($_POST['citta'] ?? '');
+    $paese             = trim($_POST['paese'] ?? '');
+    $prezzo            = (float)($_POST['prezzo'] ?? 0);
+    $data_partenza     = $_POST['data_partenza'] ?? '';
+    $data_ritorno      = $_POST['data_ritorno'] ?? '';
+    $posti_disponibili = (int)($_POST['posti_disponibili'] ?? 0);
 
     $sql = "UPDATE destinazioni 
-            SET citta=?, paese=?, prezzo=?, data_partenza=?, data_ritorno=? 
+            SET citta=?, paese=?, prezzo=?, data_partenza=?, data_ritorno=?, posti_disponibili=? 
             WHERE id=?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssdssi", $citta, $paese, $prezzo, $data_partenza, $data_ritorno, $id_destinazione);
+    $stmt->bind_param("ssdssii", $citta, $paese, $prezzo, $data_partenza, $data_ritorno, $posti_disponibili, $id_destinazione);
 
     if ($stmt->execute()) {
         $messaggio = "Destinazione modificata con successo!";
@@ -73,6 +75,10 @@ include 'header.php';
         <div class="mb-3">
             <label class="form-label">Data Ritorno</label>
             <input type="date" name="data_ritorno" class="form-control" value="<?= htmlspecialchars($data_ritorno) ?>" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Posti Disponibili</label>
+            <input type="number" name="posti_disponibili" class="form-control" min="1" value="<?= htmlspecialchars($posti_disponibili) ?>" required>
         </div>
         <button type="submit" class="btn btn-warning">Aggiorna</button>
         <a href="destinazioni.php" class="btn btn-secondary">Annulla</a>
