@@ -2,9 +2,27 @@
 require 'db.php';
 mysqli_set_charset($conn, 'utf8mb4');
 
-// Messaggio di conferma
 $messaggio = '';
 $tipoMessaggio = '';
+
+if (isset($_GET['success']) && $_GET['success'] === 'eliminata') {
+    $messaggio = "Destinazione eliminata con successo!";
+    $tipoMessaggio = "success";
+} elseif (isset($_GET['error'])) {
+    switch ($_GET['error']) {
+        case 'invalid':
+            $messaggio = "ID non valido.";
+            break;
+        case 'notfound':
+            $messaggio = "Destinazione non trovata.";
+            break;
+        case 'deletefail':
+            $messaggio = "Errore durante l'eliminazione.";
+            break;
+    }
+    $tipoMessaggio = "danger";
+}
+
 
 // Valori form (per preservare i dati in caso di errore)
 $val_citta = '';
@@ -60,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Recupera tutte le destinazioni
+// Recupero tutte le destinazioni
 $destinazioni = [];
 $sql_dest = "SELECT id, citta, paese, prezzo, data_partenza, data_ritorno, posti_disponibili 
              FROM destinazioni ORDER BY citta ASC";
@@ -132,8 +150,13 @@ include 'header.php';
                     <td><?= htmlspecialchars($d['data_ritorno']) ?></td>
                     <td><?= htmlspecialchars($d['posti_disponibili']) ?></td>
                     <td>
-                        <a href="modifica_destinazioni.php?id=<?= (int)$d['id'] ?>" class="btn btn-sm btn-warning">✏️</a>
-                        <a href="elimina_destinazioni.php?id=<?= (int)$d['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
+                        <a href="modifica_destinazioni.php?id=<?= (int)$d['id'] ?>"
+                            class="btn btn-sm btn-warning"
+                            title="Modifica destinazione" aria-label="Modifica destinazione">✏️</a>
+                        <a href="elimina_destinazioni.php?id=<?= (int)$d['id'] ?>"
+                            class="btn btn-sm btn-danger"
+                            title="Elimina destinazione" aria-label="Elimina destinazione"
+                            onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -141,16 +164,15 @@ include 'header.php';
     </table>
 </div>
 
-<!-- Modale Bootstrap esito -->
 <?php if (!empty($messaggio)): ?>
     <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content bg-white">
                 <div class="modal-header">
                     <h5 class="modal-title" id="messaggioModalLabel">Esito operazione</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
                 </div>
-                <div class="modal-body text-<?= $tipoMessaggio ?>">
+                <div class="modal-body <?= $tipoMessaggio === 'success' ? 'text-success' : ($tipoMessaggio === 'danger' ? 'text-danger' : 'text-warning') ?>">
                     <?= htmlspecialchars($messaggio, ENT_QUOTES, 'UTF-8') ?>
                 </div>
                 <div class="modal-footer">
@@ -167,7 +189,7 @@ include 'header.php';
         <div class="modal-content bg-white">
             <div class="modal-header">
                 <h5 class="modal-title" id="erroreModalLabel">Correzione richiesta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
             </div>
             <div class="modal-body text-danger" id="erroreModalBody">
                 <!-- Testo errore inserito via JS -->
@@ -187,7 +209,7 @@ include 'header.php';
             if (modalEl) {
                 const modal = new bootstrap.Modal(modalEl);
                 modal.show();
-                // Redirect solo se successo, altrimenti l'utente resta con i dati compilati
+                // Redirect solo se successo
                 <?php if ($tipoMessaggio === 'success'): ?>
                     modalEl.addEventListener('hidden.bs.modal', () => {
                         window.location.href = 'destinazioni.php';
@@ -245,6 +267,3 @@ include 'header.php';
 </script>
 
 <?php include 'footer.php'; ?>
-
-
-

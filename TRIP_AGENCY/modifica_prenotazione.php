@@ -152,5 +152,43 @@ include 'header.php';
         });
     </script>
 <?php endif; ?>
+<script>
+    let idDaEliminare = null;
+
+    function confermaEliminazione(id) {
+        idDaEliminare = id;
+        const modal = new bootstrap.Modal(document.getElementById('confermaModal'));
+        modal.show();
+    }
+
+    document.getElementById('btnConfermaElimina').addEventListener('click', () => {
+        if (!idDaEliminare) return;
+
+        // Chiamata AJAX a elimina_destinazioni.php
+        fetch('elimina_destinazioni.php?id=' + idDaEliminare, {
+                method: 'GET'
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Rimuovi la riga dalla tabella senza ricaricare la pagina
+                const riga = document.querySelector('tr td:first-child:contains("' + idDaEliminare + '")');
+                if (riga) {
+                    riga.parentElement.remove();
+                }
+
+                // Chiudi il modal
+                const modalEl = document.getElementById('confermaModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+
+                // Mostra un messaggio di conferma
+                alert("Destinazione eliminata con successo!");
+            })
+            .catch(err => {
+                alert("Errore durante l'eliminazione: " + err);
+            });
+    });
+</script>
+
 
 <?php include 'footer.php'; ?>
