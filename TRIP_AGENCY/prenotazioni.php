@@ -92,7 +92,7 @@ mysqli_free_result($res_pren);
 <div class="container mt-5">
     <h2>Prenotazioni Clienti</h2>
 
-    <!-- Form inserimento -->
+    <!-- Form Prenotazioni -->
     <div class="card mb-4">
         <div class="card-body">
             <form method="post">
@@ -135,7 +135,7 @@ mysqli_free_result($res_pren);
                     <label class="form-check-label" for="assicurazione">Assicurazione inclusa</label>
                 </div>
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary">Salva Prenotazione</button>
+                    <button type="submit" class="btn btn-primary">Aggiungi</button>
                     <a href="index.php" class="btn btn-secondary">Annulla</a>
                 </div>
             </form>
