@@ -12,7 +12,6 @@ if (isset($_GET['elimina'])) {
         if ($stmtDel) {
             $stmtDel->bind_param("i", $id);
             $ok = $stmtDel->execute();
-            // Uso affected_rows dello statement per verificare la cancellazione
             $rows = $stmtDel->affected_rows;
             $stmtDel->close();
 
@@ -24,7 +23,8 @@ if (isset($_GET['elimina'])) {
                 exit;
             }
         } else {
-            header("Location: prenotazioni.php?error=insertfail");
+            // errore nella preparazione della query di DELETE
+            header("Location: prenotazioni.php?error=deletefail");
             exit;
         }
     } else {
@@ -40,17 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validazione base
     $id_cliente       = isset($_POST['id_cliente']) ? (int)$_POST['id_cliente'] : 0;
     $id_destinazione  = isset($_POST['id_destinazione']) ? (int)$_POST['id_destinazione'] : 0;
-    $dataprenotazione = isset($_POST['dataprenotazione']) ? trim($_POST['dataprenotazione']) : '';
     $acconto          = isset($_POST['acconto']) ? (float)$_POST['acconto'] : 0.0;
-  
     $assicurazione    = isset($_POST['assicurazione']) ? 1 : 0;
 
     // Controlli minimi lato server
     $errors = [];
     if ($id_cliente <= 0)         $errors[] = 'Cliente non valido.';
     if ($id_destinazione <= 0)    $errors[] = 'Destinazione non valida.';
-    if ($dataprenotazione === '') $errors[] = 'Data prenotazione obbligatoria.';
-   
     if ($acconto < 0)             $errors[] = 'Acconto non può essere negativo.';
 
     if (!empty($errors)) {
@@ -58,17 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $sql  = "INSERT INTO prenotazioni 
-             (id_cliente, id_destinazione, dataprenotazione, acconto,  assicurazione)
-             VALUES (?, ?, ?, ?, ?)";
+    // Specificare le colonne nell'INSERT è importante (evita problemi con id auto-increment, campi nuovi, ordine colonne)
+    $sql  = "INSERT INTO prenotazioni (id_cliente, id_destinazione, acconto, assicurazione) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         header("Location: prenotazioni.php?error=insertfail");
         exit;
     }
 
-    // Tipi: i, i, s, d, i, i
-    $stmt->bind_param("iisdi", $id_cliente, $id_destinazione, $dataprenotazione, $acconto,  $assicurazione);
+    // Tipi: i = integer, d = double (float), i = integer
+    $stmt->bind_param("iidi", $id_cliente, $id_destinazione, $acconto, $assicurazione);
 
     if ($stmt->execute()) {
         $stmt->close();
@@ -100,6 +95,9 @@ if (isset($_GET['error'])) {
     if ($_GET['error'] === 'insertfail') {
         $messaggio = 'Errore durante l\'inserimento della prenotazione.';
         $tipoMessaggio = 'danger';
+    } elseif ($_GET['error'] === 'deletefail') {
+        $messaggio = 'Errore durante la cancellazione della prenotazione.';
+        $tipoMessaggio = 'danger';
     } elseif ($_GET['error'] === 'notfound') {
         $messaggio = 'Prenotazione non trovata.';
         $tipoMessaggio = 'danger';
@@ -129,9 +127,9 @@ if ($res_dest = mysqli_query($conn, $sql_dest)) {
     mysqli_free_result($res_dest);
 }
 
-// Recupera tutte le prenotazioni
+// Recupera tutte le prenotazioni (includo la data e acconto)
 $prenotazioni = [];
-$sql_pren = "SELECT p.id, c.nome, c.cognome, d.citta, p.dataprenotazione, p.acconto,  p.assicurazione
+$sql_pren = "SELECT p.id, c.nome, c.cognome, d.citta, p.dataprenotazione, p.acconto, p.assicurazione
              FROM prenotazioni p
              JOIN clienti c ON p.id_cliente = c.id
              JOIN destinazioni d ON p.id_destinazione = d.id
@@ -173,15 +171,12 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Data Prenotazione</label>
-                    <input type="date" name="dataprenotazione" class="form-control" required>
-                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Acconto (€)</label>
                     <input type="number" step="0.01" name="acconto" class="form-control" required min="0">
                 </div>
-                
+
                 <div class="mb-3 form-check">
                     <input type="checkbox" name="assicurazione" class="form-check-input" id="assicurazione">
                     <label class="form-check-label" for="assicurazione">Assicurazione</label>
@@ -200,7 +195,6 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
                 <th>Destinazione</th>
                 <th>Data</th>
                 <th>Acconto (€)</th>
-                
                 <th>Assicurazione</th>
                 <th>Azioni</th>
             </tr>
@@ -208,12 +202,22 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
         <tbody>
             <?php foreach ($prenotazioni as $p): ?>
                 <tr>
-                    <td><?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= (int)$p['id'] ?></td>
                     <td><?= htmlspecialchars($p['cognome'] . " " . $p['nome'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= htmlspecialchars($p['citta'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($p['dataprenotazione'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($p['acconto'], ENT_QUOTES, 'UTF-8') ?></td>
-                    
+                    <td>
+                        <?php
+                        if (!empty($p['dataprenotazione'])) {
+                            // formato leggibile: gg/mm/aaaa hh:mm
+                            echo htmlspecialchars(date('d/m/Y H:i', strtotime($p['dataprenotazione'])), ENT_QUOTES, 'UTF-8');
+                        } else {
+                            echo '-';
+                        }
+                        ?>
+                    </td>
+                    <td>
+                        <?= htmlspecialchars(number_format((float)$p['acconto'], 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>
+                    </td>
                     <td><?= ($p['assicurazione'] ? 'Sì' : 'No') ?></td>
                     <td>
                         <a href="modifica_prenotazione.php?id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-warning">✏️</a>

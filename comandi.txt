@@ -150,7 +150,8 @@ DROP DATABASE nome_database;
     es.: ALTER TABLE appartamenti
          DROP COLUMN giardino;
 
-
+ALTER TABLE prenotazioni
+MODIFY data_prenotazione DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 
 
