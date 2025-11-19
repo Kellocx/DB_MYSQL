@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SET id_cliente=?, id_destinazione=?, dataprenotazione=?, acconto=?,  assicurazione=? 
             WHERE id=?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iisdisi", $id_cliente, $id_destinazione, $dataprenotazione, $acconto, $assicurazione, $id_prenotazione);
+    $stmt->bind_param("iisdii", $id_cliente, $id_destinazione, $dataprenotazione, $acconto, $assicurazione, $id_prenotazione);
 
     if ($stmt->execute()) {
         $messaggio = "Anagrafica prenotazione modificata con successo!";

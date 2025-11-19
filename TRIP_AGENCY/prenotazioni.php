@@ -1,7 +1,7 @@
 <?php
 require 'db.php';
 
-// IMPORTANT: nessun output prima di header/redirect
+// Nessun output prima di header/redirect
 mysqli_set_charset($conn, 'utf8mb4');
 
 // Cancellazione prenotazione (prima di qualsiasi output)
