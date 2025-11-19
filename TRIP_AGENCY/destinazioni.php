@@ -5,6 +5,37 @@ mysqli_set_charset($conn, 'utf8mb4');
 $messaggio = '';
 $tipoMessaggio = '';
 
+// Gestione della cancellazione (usa redirect per evitare doppie esecuzioni su refresh)
+if (isset($_GET['elimina'])) {
+    // Valida l'id come intero
+    $id = filter_input(INPUT_GET, 'elimina', FILTER_VALIDATE_INT);
+    if ($id === false || $id === null) {
+        header('Location: destinazioni.php?error=invalid');
+        exit;
+    }
+
+    // Prepara la query e verifica eventuali errori
+    $stmt = $conn->prepare("DELETE FROM destinazioni WHERE id = ?");
+    if (!$stmt) {
+        // Errore di prepare
+        header('Location: destinazioni.php?error=deletefail');
+        exit;
+    }
+
+    $stmt->bind_param("i", $id);
+    if ($stmt->execute()) {
+        $stmt->close();
+        // Redirect con flag di successo per mostrare il modal in GET
+        header('Location: destinazioni.php?success=eliminata');
+        exit;
+    } else {
+        $stmt->close();
+        header('Location: destinazioni.php?error=deletefail');
+        exit;
+    }
+}
+
+// Gestione dei messaggi (da parametri GET)
 if (isset($_GET['success']) && $_GET['success'] === 'eliminata') {
     $messaggio = "Destinazione eliminata con successo!";
     $tipoMessaggio = "success";
@@ -17,12 +48,12 @@ if (isset($_GET['success']) && $_GET['success'] === 'eliminata') {
             $messaggio = "Destinazione non trovata.";
             break;
         case 'deletefail':
+        default:
             $messaggio = "Errore durante l'eliminazione.";
             break;
     }
     $tipoMessaggio = "danger";
 }
-
 
 // Valori form (per preservare i dati in caso di errore)
 $val_citta = '';
@@ -63,18 +94,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "INSERT INTO destinazioni (citta, paese, prezzo, data_partenza, data_ritorno, posti_disponibili) 
                 VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssdssi", $citta, $paese, $prezzo, $data_partenza, $data_ritorno, $posti_disponibili);
-
-        if ($stmt->execute()) {
-            $messaggio = 'Destinazione aggiunta con successo!';
-            $tipoMessaggio = 'success';
-            // Svuota i valori form solo in caso di successo
-            $val_citta = $val_paese = $val_prezzo = $val_data_partenza = $val_data_ritorno = $val_posti_disponibili = '';
-        } else {
-            $messaggio = 'Errore durante l\'inserimento: ' . htmlspecialchars($stmt->error, ENT_QUOTES, 'UTF-8');
+        if (!$stmt) {
+            $messaggio = 'Errore durante la preparazione della query: ' . htmlspecialchars($conn->error, ENT_QUOTES, 'UTF-8');
             $tipoMessaggio = 'danger';
+        } else {
+            // types: s (citta), s (paese), d (prezzo), s (data_partenza), s (data_ritorno), i (posti_disponibili)
+            $stmt->bind_param("ssdssi", $citta, $paese, $prezzo, $data_partenza, $data_ritorno, $posti_disponibili);
+
+            if ($stmt->execute()) {
+                $messaggio = 'Destinazione aggiunta con successo!';
+                $tipoMessaggio = 'success';
+                // Svuota i valori form solo in caso di successo
+                $val_citta = $val_paese = $val_prezzo = $val_data_partenza = $val_data_ritorno = $val_posti_disponibili = '';
+            } else {
+                $messaggio = 'Errore durante l\'inserimento: ' . htmlspecialchars($stmt->error, ENT_QUOTES, 'UTF-8');
+                $tipoMessaggio = 'danger';
+            }
+            $stmt->close();
         }
-        $stmt->close();
     }
 }
 
@@ -83,10 +120,18 @@ $destinazioni = [];
 $sql_dest = "SELECT id, citta, paese, prezzo, data_partenza, data_ritorno, posti_disponibili 
              FROM destinazioni ORDER BY citta ASC";
 $res_dest = mysqli_query($conn, $sql_dest);
-while ($row = mysqli_fetch_assoc($res_dest)) {
-    $destinazioni[] = $row;
+if ($res_dest) {
+    while ($row = mysqli_fetch_assoc($res_dest)) {
+        $destinazioni[] = $row;
+    }
+    // libera solo se è un risultato valido
+    if ($res_dest instanceof mysqli_result) {
+        mysqli_free_result($res_dest);
+    }
+} else {
+    $messaggio = 'Errore recupero destinazioni: ' . htmlspecialchars(mysqli_error($conn), ENT_QUOTES, 'UTF-8');
+    $tipoMessaggio = 'danger';
 }
-mysqli_free_result($res_dest);
 
 include 'header.php';
 ?>
@@ -142,18 +187,19 @@ include 'header.php';
         <tbody>
             <?php foreach ($destinazioni as $d): ?>
                 <tr>
-                    <td><?= htmlspecialchars($d['id']) ?></td>
-                    <td><?= htmlspecialchars($d['citta']) ?></td>
-                    <td><?= htmlspecialchars($d['paese']) ?></td>
-                    <td><?= htmlspecialchars($d['prezzo']) ?></td>
-                    <td><?= htmlspecialchars($d['data_partenza']) ?></td>
-                    <td><?= htmlspecialchars($d['data_ritorno']) ?></td>
-                    <td><?= htmlspecialchars($d['posti_disponibili']) ?></td>
+                    <td><?= htmlspecialchars($d['id'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars($d['paese'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars($d['prezzo'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars($d['data_partenza'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars($d['data_ritorno'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars($d['posti_disponibili'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
                         <a href="modifica_destinazioni.php?id=<?= (int)$d['id'] ?>"
                             class="btn btn-sm btn-warning"
                             title="Modifica destinazione" aria-label="Modifica destinazione">✏️</a>
-                        <a href="elimina_destinazioni.php?id=<?= (int)$d['id'] ?>"
+
+                        <a href="?elimina=<?= (int)$d['id'] ?>"
                             class="btn btn-sm btn-danger"
                             title="Elimina destinazione" aria-label="Elimina destinazione"
                             onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
@@ -201,18 +247,22 @@ include 'header.php';
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
+
 <?php if (!empty($messaggio)): ?>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const modalEl = document.getElementById('messaggioModal');
-            if (modalEl) {
+            if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                 const modal = new bootstrap.Modal(modalEl);
                 modal.show();
-                // Redirect solo se successo
+
+                // Redirect opzionale SOLO se success
                 <?php if ($tipoMessaggio === 'success'): ?>
                     modalEl.addEventListener('hidden.bs.modal', () => {
-                        window.location.href = 'destinazioni.php';
+                        // Ricarica la pagina per pulire eventuali GET param
+                        location.href = 'destinazioni.php';
                     });
                 <?php endif; ?>
             }
@@ -227,14 +277,17 @@ include 'header.php';
         const partenzaEl = document.getElementById('data_partenza');
         const ritornoEl = document.getElementById('data_ritorno');
 
+        // Se gli elementi non esistono, non bloccare il submit
+        if (!partenzaEl || !ritornoEl) return true;
+
         const partenza = partenzaEl.value;
         const ritorno = ritornoEl.value;
 
-        if (partenza < oggi) {
+        if (partenza && partenza < oggi) {
             mostraErrore("La data di partenza deve essere uguale o successiva a oggi.");
             return false;
         }
-        if (ritorno < partenza) {
+        if (partenza && ritorno && ritorno < partenza) {
             mostraErrore("La data di ritorno deve essere uguale o successiva alla data di partenza.");
             return false;
         }
@@ -243,9 +296,12 @@ include 'header.php';
 
     // Mostra un modal Bootstrap con errore senza perdere i dati del form
     function mostraErrore(testo) {
-        const body = document.getElementById('erroreModalBody');
-        body.textContent = testo;
-        const modal = new bootstrap.Modal(document.getElementById('erroreModal'));
+        const bodyEl = document.getElementById('erroreModalBody');
+        const modalWrap = document.getElementById('erroreModal');
+        if (!bodyEl || !modalWrap || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+
+        bodyEl.textContent = testo;
+        const modal = new bootstrap.Modal(modalWrap);
         modal.show();
     }
 
@@ -259,11 +315,11 @@ include 'header.php';
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Imposta il min del ritorno al caricamento se la partenza è già valorizzata (es. post con errore)
         impostaMinRitorno();
-        // Aggiorna il min del ritorno ad ogni cambio della partenza
-        document.getElementById('data_partenza').addEventListener('change', impostaMinRitorno);
+        const partenzaEl = document.getElementById('data_partenza');
+        if (partenzaEl) {
+            partenzaEl.addEventListener('change', impostaMinRitorno);
+        }
     });
 </script>
-
 <?php include 'footer.php'; ?>
