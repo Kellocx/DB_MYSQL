@@ -12,12 +12,12 @@ if (!$id_prenotazione) {
 }
 
 // Recupera dati prenotazione
-$sql = "SELECT id_cliente, id_destinazione, dataprenotazione, acconto, numero_persone, assicurazione 
+$sql = "SELECT id_cliente, id_destinazione, dataprenotazione, acconto,  assicurazione 
         FROM prenotazioni WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_prenotazione);
 $stmt->execute();
-$stmt->bind_result($id_cliente, $id_destinazione, $dataprenotazione, $acconto, $numero_persone, $assicurazione);
+$stmt->bind_result($id_cliente, $id_destinazione, $dataprenotazione, $acconto, $assicurazione);
 if (!$stmt->fetch()) {
     $stmt->close();
     header("Location: prenotazioni.php?error=notfound");
@@ -31,14 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_destinazione = (int)$_POST['id_destinazione'];
     $dataprenotazione = $_POST['dataprenotazione'];
     $acconto         = (float)$_POST['acconto'];
-    $numero_persone  = (int)$_POST['numero_persone'];
+   
     $assicurazione   = isset($_POST['assicurazione']) ? 1 : 0;
 
     $sql = "UPDATE prenotazioni 
-            SET id_cliente=?, id_destinazione=?, dataprenotazione=?, acconto=?, numero_persone=?, assicurazione=? 
+            SET id_cliente=?, id_destinazione=?, dataprenotazione=?, acconto=?,  assicurazione=? 
             WHERE id=?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iisdisi", $id_cliente, $id_destinazione, $dataprenotazione, $acconto, $numero_persone, $assicurazione, $id_prenotazione);
+    $stmt->bind_param("iisdisi", $id_cliente, $id_destinazione, $dataprenotazione, $acconto, $assicurazione, $id_prenotazione);
 
     if ($stmt->execute()) {
         $messaggio = "Anagrafica prenotazione modificata con successo!";
@@ -102,10 +102,7 @@ include 'header.php';
             <label class="form-label">Acconto (€)</label>
             <input type="number" step="0.01" name="acconto" class="form-control" value="<?= htmlspecialchars($acconto) ?>" required>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Numero Persone</label>
-            <input type="number" name="numero_persone" class="form-control" value="<?= htmlspecialchars($numero_persone) ?>" required>
-        </div>
+       
         <div class="form-check mb-3">
             <input type="checkbox" name="assicurazione" class="form-check-input" id="assicurazione" <?= $assicurazione ? 'checked' : '' ?>>
             <label class="form-check-label" for="assicurazione">Assicurazione inclusa</label>
