@@ -1,31 +1,40 @@
+--------------------------CLIENTI------------------------------
+
+id (PK)
+nome
+cognome
+email
+telefono
+nazione
+codice_fiscale
+documento
 
 
-Skip to content
-Navigation Menu
-DiegoAneli
-DB_MYSQL_PHP
- 
-Type / to search
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-Insights
-DB_MYSQL_PHP/TRIP_AGENCY
-/SCHEMA_ER.TXT
+--------------------------DESTINAZIONI------------------------------
 
-t
-DiegoAneli
-DiegoAneli
-TRIPAGENCY
-e85a5b0
- · 
-2 days ago
+id (PK)
+città
+paese
+prezzo
+data_partenza
+data_ritorno
 
-Code
 
-Blame
 
-DB_MYSQL_PHP/TRIP_AGENCY/SCHEMA_ER.TXT at main · DiegoAneli/DB_MYSQL_PHP 
+--------------------------PRENOTAZIONI------------------------------
+
+id (PK)
+data_prenotazione
+acconto
+numero_persone
+assicurazione
+
+
+
+--------------------------RELAZIONI------------------------------
+
+CLIENTE -> PRENOTAZIONI:
+1:N (un cliente puo' avere piu prenotazioni)
+
+DESTINAZIONE -> PRENOTAZIONI
+1:N (una destinazione puo' essere prenotata da piu clienti)

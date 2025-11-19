@@ -222,7 +222,18 @@ ID INT AUTO_INCREMENT PRIMARY KEY               ID INT AUTO_INCREMENT PRIMARY KE
                                                 FOREIGN KEY (id_appartamento) REFERENCES appartamenti(id);
 
 
-                                                ------------ POSTI DISPONIBILI ------------
 
+// JOIN TABELLE PRENOTAZIONI
 
-                                                $stmt->bind_param("ssdssi", $_POST['citta'], $_POST['paese'], $_POST['prezzo'], $_POST['data_partenza'], $_POST['data_ritorno'], $_POST['posti_disponibili']);
+SELECT
+    ID -> Prenotazioni 
+    nome -> Clienti
+    cognome -> CLIENTE
+    citta -> Destinazione
+    paese -> Destinazione
+    data_prenotazione -> Prenotazione
+    numero_persone -> Prenotazione
+
+    JOIN METODO
+    Clienti Prenotazioni.ID_CLIENTE = CLIENTE.ID
+    Destinazioni Prenotazioni.ID_DESTINAZIONE = DESTINAZIONE.ID
