@@ -29,9 +29,9 @@ $stmt->close();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_cliente      = (int)$_POST['id_cliente'];
     $id_destinazione = (int)$_POST['id_destinazione'];
-   
+
     $acconto         = (float)$_POST['acconto'];
-   
+
     $assicurazione   = isset($_POST['assicurazione']) ? 1 : 0;
 
     $sql = "UPDATE prenotazioni 
@@ -68,17 +68,50 @@ while ($row = mysqli_fetch_assoc($res_dest)) {
 }
 mysqli_free_result($res_dest);
 
+// Determina l'URL di ritorno (back): preferisce il parametro 'back' se è un percorso relativo,
+// altrimenti usa HTTP_REFERER solo se è dello stesso host; altrimenti fallback a null.
+$backUrl = null;
+if (!empty($_GET['back'])) {
+    $backCandidate = $_GET['back'];
+    // accettiamo solo percorsi relativi che iniziano con '/' per evitare open redirects
+    if (strpos($backCandidate, '/') === 0 && strpos($backCandidate, '//') !== 0) {
+        $backUrl = $backCandidate;
+    }
+} elseif (!empty($_SERVER['HTTP_REFERER'])) {
+    $ref = $_SERVER['HTTP_REFERER'];
+    $parts = parse_url($ref);
+    if (isset($parts['host']) && $parts['host'] === $_SERVER['HTTP_HOST']) {
+        $path = $parts['path'] ?? '/';
+        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $backUrl = $path . $query;
+    }
+}
+
 include 'header.php';
 ?>
 
 <div class="container mt-5">
-    <h2>Modifica Prenotazione</h2>
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="me-auto">Modifica Prenotazione</h2>
+
+        <!-- Bottone Back: se esiste $backUrl è un link sicuro, altrimenti usa history.back() -->
+        <?php if ($backUrl): ?>
+            <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-outline-secondary me-2">
+                &larr; Torna indietro
+            </a>
+        <?php else: ?>
+            <button type="button" class="btn btn-outline-secondary me-2" onclick="history.back();">
+                &larr; Torna indietro
+            </button>
+        <?php endif; ?>
+    </div>
+
     <form method="post">
         <div class="mb-3">
             <label class="form-label">Cliente</label>
             <select name="id_cliente" class="form-select" required>
                 <?php foreach ($clienti as $c): ?>
-                    <option value="<?= $c['id'] ?>" <?= $c['id'] == $id_cliente ? 'selected' : '' ?>>
+                    <option value="<?= htmlspecialchars($c['id'], ENT_QUOTES, 'UTF-8') ?>" <?= $c['id'] == $id_cliente ? 'selected' : '' ?>>
                         <?= htmlspecialchars($c['cognome'] . " " . $c['nome'], ENT_QUOTES, 'UTF-8') ?>
                     </option>
                 <?php endforeach; ?>
@@ -88,30 +121,36 @@ include 'header.php';
             <label class="form-label">Destinazione</label>
             <select name="id_destinazione" class="form-select" required>
                 <?php foreach ($destinazioni as $d): ?>
-                    <option value="<?= $d['id'] ?>" <?= $d['id'] == $id_destinazione ? 'selected' : '' ?>>
+                    <option value="<?= htmlspecialchars($d['id'], ENT_QUOTES, 'UTF-8') ?>" <?= $d['id'] == $id_destinazione ? 'selected' : '' ?>>
                         <?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?>
                     </option>
                 <?php endforeach; ?>
             </select>
         </div>
-       
+
         <div class="mb-3">
             <label class="form-label">Acconto (€)</label>
-            <input type="number" step="0.01" name="acconto" class="form-control" value="<?= htmlspecialchars($acconto) ?>" required>
+            <input type="number" step="0.01" name="acconto" class="form-control" value="<?= htmlspecialchars($acconto, ENT_QUOTES, 'UTF-8') ?>" required>
         </div>
-       
+
         <div class="form-check mb-3">
             <input type="checkbox" name="assicurazione" class="form-check-input" id="assicurazione" <?= $assicurazione ? 'checked' : '' ?>>
             <label class="form-check-label" for="assicurazione">Assicurazione inclusa</label>
         </div>
         <div class="mb-3">
             <button type="submit" class="btn btn-warning">Aggiorna Prenotazione</button>
-            <a href="prenotazioni.php" class="btn btn-secondary">Annulla</a>
+
+            <!-- Pulsante Annulla: se abbiamo un backUrl lo usiamo, altrimenti ritorniamo alla lista prenotazioni -->
+            <?php if ($backUrl): ?>
+                <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary ms-2">Annulla</a>
+            <?php else: ?>
+                <a href="prenotazioni.php" class="btn btn-secondary ms-2">Annulla</a>
+            <?php endif; ?>
         </div>
     </form>
 </div>
 
-<!-- Modale Bootstrap -->
+<!-- Modale Bootstrap per messaggio esito operazione -->
 <?php if (!empty($messaggio)): ?>
     <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -121,7 +160,7 @@ include 'header.php';
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-<?= $tipoMessaggio ?>">
-                    <?= htmlspecialchars($messaggio) ?>
+                    <?= htmlspecialchars($messaggio, ENT_QUOTES, 'UTF-8') ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
@@ -140,49 +179,43 @@ include 'header.php';
                 const modal = new bootstrap.Modal(modalEl);
                 modal.show();
                 modalEl.addEventListener('hidden.bs.modal', () => {
+                    // dopo la chiusura ritorniamo alla lista prenotazioni
                     window.location.href = 'prenotazioni.php';
                 });
             }
         });
     </script>
 <?php endif; ?>
+
 <script>
-    let idDaEliminare = null;
+    // Protezione: controlliamo che gli elementi esistano prima di registrarvi gli event listener
+    if (document.getElementById('btnConfermaElimina')) {
+        let idDaEliminare = null;
 
-    function confermaEliminazione(id) {
-        idDaEliminare = id;
-        const modal = new bootstrap.Modal(document.getElementById('confermaModal'));
-        modal.show();
+        function confermaEliminazione(id) {
+            idDaEliminare = id;
+            const modal = new bootstrap.Modal(document.getElementById('confermaModal'));
+            modal.show();
+        }
+
+        document.getElementById('btnConfermaElimina').addEventListener('click', () => {
+            if (!idDaEliminare) return;
+
+            // Chiamata AJAX a elimina_destinazioni.php
+            fetch('elimina_destinazioni.php?id=' + encodeURIComponent(idDaEliminare), {
+                    method: 'GET'
+                })
+                .then(response => response.text())
+                .then(data => {
+                    // Non possiamo trovare la riga in modo affidabile qui senza markup specifico, quindi
+                    // suggeriamo di ricaricare la pagina per aggiornare la tabella.
+                    location.reload();
+                })
+                .catch(err => {
+                    alert("Errore durante l'eliminazione: " + err);
+                });
+        });
     }
-
-    document.getElementById('btnConfermaElimina').addEventListener('click', () => {
-        if (!idDaEliminare) return;
-
-        // Chiamata AJAX a elimina_destinazioni.php
-        fetch('elimina_destinazioni.php?id=' + idDaEliminare, {
-                method: 'GET'
-            })
-            .then(response => response.text())
-            .then(data => {
-                // Rimuovi la riga dalla tabella senza ricaricare la pagina
-                const riga = document.querySelector('tr td:first-child:contains("' + idDaEliminare + '")');
-                if (riga) {
-                    riga.parentElement.remove();
-                }
-
-                // Chiudi il modal
-                const modalEl = document.getElementById('confermaModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                modal.hide();
-
-                // Mostra un messaggio di conferma
-                alert("Destinazione eliminata con successo!");
-            })
-            .catch(err => {
-                alert("Errore durante l'eliminazione: " + err);
-            });
-    });
 </script>
-
 
 <?php include 'footer.php'; ?>

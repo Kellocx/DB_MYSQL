@@ -79,9 +79,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     value="<?= htmlspecialchars($documento) ?>"></div>
             <button type="submit" class="btn btn-warning">Aggiorna</button>
             <a href="clienti.php" class="btn btn-secondary">Annulla</a>
+
         </form>
     </div>
-
+   
     <!-- Modale Bootstrap -->
     <?php if (!empty($messaggio)): ?>
         <div class="modal fade" id="messaggioModal" tabindex="-1" aria-labelledby="messaggioModalLabel" aria-hidden="true">
