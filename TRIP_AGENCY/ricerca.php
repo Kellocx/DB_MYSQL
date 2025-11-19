@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 }
 
-$sql = "SELECT p.id, c.nome, c.cognome, d.citta, p.dataprenotazione, p.acconto, p.numero_persone, p.assicurazione
+$sql = "SELECT p.id, c.nome, c.cognome, d.citta, p.dataprenotazione, p.acconto, p.assicurazione
         FROM prenotazioni p
         JOIN clienti c ON p.id_cliente = c.id
         JOIN destinazioni d ON p.id_destinazione = d.id";
@@ -161,7 +161,7 @@ $stmt->close();
                 <th>Destinazione</th>
                 <th>Data</th>
                 <th>Acconto (€)</th>
-                <th>Persone</th>
+              
                 <th>Assicurazione</th>
             </tr>
         </thead>
@@ -174,7 +174,7 @@ $stmt->close();
                         <td><?= htmlspecialchars($p['citta']) ?></td>
                         <td><?= htmlspecialchars($p['dataprenotazione']) ?></td>
                         <td><?= htmlspecialchars($p['acconto']) ?></td>
-                        <td><?= htmlspecialchars($p['numero_persone']) ?></td>
+                     
                         <td><?= $p['assicurazione'] ? 'Sì' : 'No' ?></td>
                     </tr>
                 <?php endforeach; ?>
