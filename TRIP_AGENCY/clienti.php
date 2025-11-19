@@ -161,7 +161,10 @@ $result = $conn->query("SELECT * FROM clienti ORDER BY cognome ASC LIMIT $perPag
                         <td><?= htmlspecialchars($row['documento']) ?></td>
                         <td>
                             <a href="modifica_cliente.php?id=<?= (int)$row['id'] ?>" class="btn btn-sm btn-warning">✏️</a>
-                            <a href="elimina_cliente.php?id=<?= (int)$row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questo cliente?')">🗑️</a>
+
+                            
+                            <a class="btn btn-sm btn-danger" href="?elimina=<?= htmlspecialchars($row['id']) ?>" onclick="return confirm('Eliminare questa prenotazione?')">🗑️</a>
+                            <!-- <a href="elimina_cliente.php?id=<?= (int)$row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare questo cliente?')">🗑️</a> -->
                         </td>
                     </tr>
                 <?php endwhile; ?>
