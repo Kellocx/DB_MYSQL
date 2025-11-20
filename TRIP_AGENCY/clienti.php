@@ -229,16 +229,16 @@ if ($result === false) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Data nascita</th>
-                <th>Email</th>
-                <th>Telefono</th>
-                <th>Nazione</th>
-                <th>Codice Fiscale</th>
-                <th>Documento</th>
-                <th>Azioni</th>
+                <th scope="row">ID</th>
+                <th scope="row">Nome</th>
+                <th scope="row">Cognome</th>
+                <th scope="row">Data nascita</th>
+                <th scope="row">Email</th>
+                <th scope="row">Telefono</th>
+                <th scope="row">Nazione</th>
+                <th scope="row">Codice Fiscale</th>
+                <th scope="row">Documento</th>
+                <th scope="row">Azioni</th>
             </tr>
         </thead>
         <tbody>

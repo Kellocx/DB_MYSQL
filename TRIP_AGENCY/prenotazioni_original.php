@@ -5,70 +5,26 @@ require 'db.php';
 mysqli_set_charset($conn, 'utf8mb4');
 
 // Cancellazione prenotazione (prima di qualsiasi output)
-// Ora la cancellazione ripristina 1 posto disponibile nella destinazione in modo atomico.
 if (isset($_GET['elimina'])) {
     $id = (int)$_GET['elimina'];
     if ($id > 0) {
-        // Inizio transazione per evitare condizioni di gara
-        $conn->begin_transaction();
-
-        // Recupero id_destinazione della prenotazione da eliminare
-        $stmtSel = $conn->prepare("SELECT id_destinazione FROM prenotazioni WHERE id = ?");
-        if (!$stmtSel) {
-            $conn->rollback();
-            header("Location: prenotazioni.php?error=deletefail");
-            exit;
-        }
-        $stmtSel->bind_param("i", $id);
-        $stmtSel->execute();
-        $stmtSel->bind_result($id_destinazione);
-        if (!$stmtSel->fetch()) {
-            // prenotazione non trovata
-            $stmtSel->close();
-            $conn->rollback();
-            header("Location: prenotazioni.php?error=notfound");
-            exit;
-        }
-        $stmtSel->close();
-
-        // Elimino la prenotazione
         $stmtDel = $conn->prepare("DELETE FROM prenotazioni WHERE id = ?");
-        if (!$stmtDel) {
-            $conn->rollback();
-            header("Location: prenotazioni.php?error=deletefail");
-            exit;
-        }
-        $stmtDel->bind_param("i", $id);
-        $ok = $stmtDel->execute();
-        $rows = $stmtDel->affected_rows;
-        $stmtDel->close();
+        if ($stmtDel) {
+            $stmtDel->bind_param("i", $id);
+            $ok = $stmtDel->execute();
+            $rows = $stmtDel->affected_rows;
+            $stmtDel->close();
 
-        if ($ok && $rows > 0) {
-            // Incremento posti disponibili della destinazione (ripristino posto)
-            $stmtInc = $conn->prepare("UPDATE destinazioni SET posti_disponibili = posti_disponibili + 1 WHERE id = ?");
-            if (!$stmtInc) {
-                $conn->rollback();
-                header("Location: prenotazioni.php?error=deletefail");
-                exit;
-            }
-            $stmtInc->bind_param("i", $id_destinazione);
-            $okInc = $stmtInc->execute();
-            $affectedInc = $stmtInc->affected_rows;
-            $stmtInc->close();
-
-            if ($okInc && $affectedInc > 0) {
-                $conn->commit();
+            if ($ok && $rows > 0) {
                 header("Location: prenotazioni.php?success=eliminato");
                 exit;
             } else {
-                // Non siamo riusciti ad aggiornare i posti, rollback
-                $conn->rollback();
-                header("Location: prenotazioni.php?error=deletefail");
+                header("Location: prenotazioni.php?error=notfound");
                 exit;
             }
         } else {
-            $conn->rollback();
-            header("Location: prenotazioni.php?error=notfound");
+            // errore nella preparazione della query di DELETE
+            header("Location: prenotazioni.php?error=deletefail");
             exit;
         }
     } else {
@@ -98,39 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Inizio transazione per inserimento + decremento posti (operazione atomica)
-    $conn->begin_transaction();
-
-    // Controllo posti disponibili e blocco riga (per evitare race condition)
-    $stmtSel = $conn->prepare("SELECT posti_disponibili FROM destinazioni WHERE id = ? FOR UPDATE");
-    if (!$stmtSel) {
-        $conn->rollback();
-        header("Location: prenotazioni.php?error=insertfail");
-        exit;
-    }
-    $stmtSel->bind_param("i", $id_destinazione);
-    $stmtSel->execute();
-    $stmtSel->bind_result($posti_disponibili);
-    if (!$stmtSel->fetch()) {
-        // destinazione non trovata
-        $stmtSel->close();
-        $conn->rollback();
-        header("Location: prenotazioni.php?error=invalid");
-        exit;
-    }
-    $stmtSel->close();
-
-    if ($posti_disponibili <= 0) {
-        $conn->rollback();
-        header("Location: prenotazioni.php?error=full");
-        exit;
-    }
-
-    // Inserisco la prenotazione
+    // Specificare le colonne nell'INSERT è importante (evita problemi con id auto-increment, campi nuovi, ordine colonne)
     $sql  = "INSERT INTO prenotazioni (id_cliente, id_destinazione, acconto, assicurazione) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
-        $conn->rollback();
         header("Location: prenotazioni.php?error=insertfail");
         exit;
     }
@@ -138,34 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Tipi: i = integer, d = double (float), i = integer
     $stmt->bind_param("iidi", $id_cliente, $id_destinazione, $acconto, $assicurazione);
 
-    if (!$stmt->execute()) {
+    if ($stmt->execute()) {
         $stmt->close();
-        $conn->rollback();
-        header("Location: prenotazioni.php?error=insertfail");
-        exit;
-    }
-    $stmt->close();
-
-    // Decremento dei posti disponibili
-    $stmtUpd = $conn->prepare("UPDATE destinazioni SET posti_disponibili = posti_disponibili - 1 WHERE id = ? AND posti_disponibili > 0");
-    if (!$stmtUpd) {
-        $conn->rollback();
-        header("Location: prenotazioni.php?error=insertfail");
-        exit;
-    }
-    $stmtUpd->bind_param("i", $id_destinazione);
-    $stmtUpd->execute();
-    $affected = $stmtUpd->affected_rows;
-    $stmtUpd->close();
-
-    if ($affected > 0) {
-        $conn->commit();
         header("Location: prenotazioni.php?success=aggiunto");
         exit;
     } else {
-        // Qualcosa è andato storto (ad es. posto esaurito tra select ed update) -> rollback e rimuovere la prenotazione fatta
-        $conn->rollback();
-        header("Location: prenotazioni.php?error=full");
+        $stmt->close();
+        header("Location: prenotazioni.php?error=insertfail");
         exit;
     }
 }
@@ -198,9 +104,6 @@ if (isset($_GET['error'])) {
     } elseif ($_GET['error'] === 'invalid') {
         $messaggio = 'Dati non validi. Controlla i campi.';
         $tipoMessaggio = 'danger';
-    } elseif ($_GET['error'] === 'full') {
-        $messaggio = 'Posti esauriti per la destinazione selezionata.';
-        $tipoMessaggio = 'warning';
     }
 }
 
@@ -214,9 +117,9 @@ if ($res_clienti = mysqli_query($conn, $sql_clienti)) {
     mysqli_free_result($res_clienti);
 }
 
-// Recupera lista destinazioni (includo posti disponibili per eventuale visualizzazione)
+// Recupera lista destinazioni
 $destinazioni = [];
-$sql_dest = "SELECT id, citta, posti_disponibili FROM destinazioni ORDER BY citta ASC";
+$sql_dest = "SELECT id, citta FROM destinazioni ORDER BY citta ASC";
 if ($res_dest = mysqli_query($conn, $sql_dest)) {
     while ($row = mysqli_fetch_assoc($res_dest)) {
         $destinazioni[] = $row;
@@ -263,7 +166,7 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
                         <option value="">-- Seleziona destinazione --</option>
                         <?php foreach ($destinazioni as $d): ?>
                             <option value="<?= (int)$d['id'] ?>">
-                                <?= htmlspecialchars($d['citta'] . ' (' . (int)$d['posti_disponibili'] . ' posti)', ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -287,13 +190,13 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="row">ID</th>
-                <th scope="row">Cliente</th>
-                <th scope="row">Destinazione</th>
-                <th scope="row">Data</th>
-                <th scope="row">Acconto (€)</th>
-                <th scope="row">Assicurazione</th>
-                <th scope="row">Azioni</th>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Destinazione</th>
+                <th>Data</th>
+                <th>Acconto (€)</th>
+                <th>Assicurazione</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>

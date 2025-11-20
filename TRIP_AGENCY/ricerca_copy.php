@@ -128,8 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 }
 
-// Query principale
-$sql = "SELECT p.id, c.nome, c.cognome, d.citta, p.dataprenotazione, p.acconto, p.assicurazione
+// Query principale: aggiunto d.posti_disponibili
+$sql = "SELECT p.id, c.nome, c.cognome, d.citta, d.posti_disponibili, p.dataprenotazione, p.acconto, p.assicurazione
         FROM prenotazioni p
         JOIN clienti c ON p.id_cliente = c.id
         JOIN destinazioni d ON p.id_destinazione = d.id";
@@ -320,22 +320,22 @@ endif;
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="row">ID</th>
-                <th scope="row">Cliente</th>
-                <th scope="row">Destinazione</th>
-                <th scope="row">Data</th>
-                <th scope="row">Acconto (€)</th>
-                <th scope="row">Assicurazione</th>
-                <th scope="row">Azioni</th>
+                <th>Cliente</th>
+                <th>Destinazione</th>
+                <th>Posti disponibili</th>
+                <th>Data</th>
+                <th>Acconto (€)</th>
+                <th>Assicurazione</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
             <?php if ($prenotazioni): ?>
                 <?php foreach ($prenotazioni as $p): ?>
                     <tr>
-                        <td><?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($p['cognome'] . " " . $p['nome'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($p['citta'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= htmlspecialchars((isset($p['posti_disponibili']) ? (int)$p['posti_disponibili'] : '-'), ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($p['dataprenotazione'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars(number_format((float)$p['acconto'], 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= ((int)$p['assicurazione']) ? 'Sì' : 'No' ?></td>
