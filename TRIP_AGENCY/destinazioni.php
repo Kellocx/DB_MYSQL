@@ -175,7 +175,7 @@ include 'header.php';
         <table class="table table-striped table-responsive">
             <thead>
                 <tr>
-                    
+                    <th scope="row">ID</th>
                     <th scope="row">Città</th>
                     <th scope="row">Paese</th>
                     <th scope="row">Prezzo (€)</th>
@@ -188,7 +188,7 @@ include 'header.php';
             <tbody>
                 <?php foreach ($destinazioni as $d): ?>
                     <tr>
-                       
+                        <td><?= htmlspecialchars($d['id'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($d['paese'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($d['prezzo'], ENT_QUOTES, 'UTF-8') ?></td>

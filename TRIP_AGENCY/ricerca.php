@@ -309,6 +309,7 @@ endif;
         <table class="table table-striped table-hover table-sm align-middle">
             <thead class="table-light">
                 <tr>
+                    <th>ID</th>
                     <th>Cliente</th>
                     <th>Destinazione</th>
                     <th>Posti disponibili</th>
@@ -322,6 +323,7 @@ endif;
                 <?php if ($prenotazioni): ?>
                     <?php foreach ($prenotazioni as $p): ?>
                         <tr>
+                            <td><?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($p['cognome'] . " " . $p['nome'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($p['citta'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((isset($p['posti_disponibili']) ? (int)$p['posti_disponibili'] : '-'), ENT_QUOTES, 'UTF-8') ?></td>

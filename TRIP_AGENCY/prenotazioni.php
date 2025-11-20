@@ -191,7 +191,7 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
         <table class="table table-striped">
             <thead>
                 <tr>
-                   
+                    <th>ID</th>
                     <th>Cliente</th>
                     <th>Destinazione</th>
                     <th>Data</th>
@@ -203,7 +203,7 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
             <tbody>
                 <?php foreach ($prenotazioni as $p): ?>
                     <tr>
-                        
+                        <td><?= (int)$p['id'] ?></td>
                         <td><?= htmlspecialchars($p['cognome'] . " " . $p['nome'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($p['citta'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td>

@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         header('Location: clienti.php?error=insertfail');
         exit;
-    }
+    } 
 }
 
 // Conteggio totale clienti
@@ -256,7 +256,7 @@ if ($result === false) {
         <table class="table table-striped table-hover table-sm align-middle">
             <thead>
                 <tr>
-                    <th>ID</th>
+
                     <th>Nome</th>
                     <th>Cognome</th>
                     <th class="d-none d-sm-table-cell">Data nascita</th>
@@ -272,7 +272,7 @@ if ($result === false) {
                 <?php if ($result && $result->num_rows > 0): ?>
                     <?php while ($row = $result->fetch_assoc()): ?>
                         <tr>
-                            <td><?= htmlspecialchars($row['id'], ENT_QUOTES, 'UTF-8') ?></td>
+
                             <td><?= htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($row['cognome'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td class="d-none d-sm-table-cell"><?= htmlspecialchars($row['data_nascita'], ENT_QUOTES, 'UTF-8') ?></td>
