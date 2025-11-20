@@ -45,17 +45,17 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="navbar-nav ms-auto">
-                    <!--Link del menu-->
-                    <a href="clienti.php" class="nav-link">Clienti</a>
-                    <a href="destinazioni.php" class="nav-link">Destinazioni</a>
-                    <a href="prenotazioni.php" class="nav-link">Prenotazioni</a>
-                    <a href="ricerca.php" class="nav-link">Ricerca</a>
-                    <a href="statistiche.php" class="nav-link">Statistiche</a>
+            <div class="collapse navbar-collapse align-items-end" id="navbarNav">
+                <div class="navbar-nav align-items-end item_right">
+
+                    <a class="nav-link" href="clienti.php">Clienti</a>
+                    <a class="nav-link" href="destinazioni.php">Destinazioni</a>
+                    <a class="nav-link" href="Prenotazioni.php">Prenotazioni</a>
+                    <a class="nav-link" href="Ricerca.php">Ricerca</a>
+                    <a class="nav-link" href="Statistiche.php">Statistiche</a>
 
                 </div>
-            </div>
+            </div> 
         </div>
     </nav>
 

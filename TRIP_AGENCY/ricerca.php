@@ -8,7 +8,6 @@ if (!isset($conn) || !($conn instanceof mysqli)) {
     die('Connessione al database non disponibile.');
 }
 if (!$conn->set_charset('utf8mb4')) {
-    // non fatale, ma utile per il debug in sviluppo
     error_log('Impossibile impostare charset: ' . $conn->error);
 }
 
@@ -97,27 +96,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     }
 
-    // Acconto minimo
-    if (isset($_GET['acconto_min']) && $_GET['acconto_min'] !== '') {
-        $min = $_GET['acconto_min'];
-        if (is_numeric($min)) {
-            $where[] = "p.acconto >= ?";
-            $params[] = (float) $min;
+    // Acconto (valore preciso)
+    if (isset($_GET['acconto']) && $_GET['acconto'] !== '') {
+        $ac = $_GET['acconto'];
+        if (is_numeric($ac)) {
+            $where[] = "p.acconto = ?";
+            $params[] = (float) $ac;
             $types   .= 'd';
         }
     }
 
-    // Acconto massimo
-    if (isset($_GET['acconto_max']) && $_GET['acconto_max'] !== '') {
-        $max = $_GET['acconto_max'];
-        if (is_numeric($max)) {
-            $where[] = "p.acconto <= ?";
-            $params[] = (float) $max;
-            $types   .= 'd';
+    // Posti disponibili (minimo)
+    if (isset($_GET['posti_disponibili']) && $_GET['posti_disponibili'] !== '') {
+        $pd = $_GET['posti_disponibili'];
+        if (is_numeric($pd)) {
+            $where[] = "d.posti_disponibili >= ?";
+            $params[] = (int) $pd;
+            $types   .= 'i';
         }
     }
 
-    // Assicurazione (0 o 1). Usiamo isset per distinguere da campo vuoto.
+    // Assicurazione (0 o 1)
     if (isset($_GET['assicurazione']) && $_GET['assicurazione'] !== '') {
         if ($_GET['assicurazione'] === '0' || $_GET['assicurazione'] === '1') {
             $ass = (int) $_GET['assicurazione'];
@@ -128,8 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 }
 
-// Query principale
-$sql = "SELECT p.id, c.nome, c.cognome, d.citta, p.dataprenotazione, p.acconto, p.assicurazione
+// Query principale: includiamo d.posti_disponibili
+$sql = "SELECT p.id, c.nome, c.cognome, d.citta, d.posti_disponibili, p.dataprenotazione, p.acconto, p.assicurazione
         FROM prenotazioni p
         JOIN clienti c ON p.id_cliente = c.id
         JOIN destinazioni d ON p.id_destinazione = d.id";
@@ -143,20 +142,16 @@ $prenotazioni = [];
 
 if ($stmt = $conn->prepare($sql)) {
     if ($where && $types !== '') {
-        // bind_param richiede variabili passate per riferimento, quindi prepariamo un array di riferimenti
         $bind_names = [];
-        // Deve essere una variabile perché passiamo per riferimento
         $bind_types = $types;
         $bind_names[] = &$bind_types;
         for ($i = 0; $i < count($params); $i++) {
             $bind_names[] = &$params[$i];
         }
-        // Effettuiamo il bind
         call_user_func_array([$stmt, 'bind_param'], $bind_names);
     }
 
     if (!$stmt->execute()) {
-        // in caso di errore, lo registriamo
         error_log('Errore esecuzione statement: ' . $stmt->error);
     } else {
         $res = $stmt->get_result();
@@ -172,8 +167,7 @@ if ($stmt = $conn->prepare($sql)) {
     error_log('Errore prepare SQL: ' . $conn->error);
 }
 
-// Costruisci URI corrente (path + query) per passare come back param ai link di modifica.
-// Usiamo REQUEST_URI che inizia con '/' ed è quindi accettata dalla logica di sicurezza in modifica_prenotazione.php.
+// Costruisci URI corrente per passare come back param ai link di modifica.
 $current_request_uri = $_SERVER['REQUEST_URI'];
 ?>
 <?php
@@ -211,10 +205,7 @@ if (!empty($_SESSION['delete_success']) || !empty($_SESSION['delete_error'])): ?
             if (el) {
                 var m = new bootstrap.Modal(el);
                 m.show();
-
-                // Alla chiusura del modal reindirizza a ricerca.php (pagina desiderata)
                 el.addEventListener('hidden.bs.modal', function() {
-                    // Se vuoi mantenere parametri puoi costruire un URL diverso qui
                     window.location.href = 'ricerca.php';
                 });
             }
@@ -222,12 +213,9 @@ if (!empty($_SESSION['delete_success']) || !empty($_SESSION['delete_error'])): ?
     </script>
 
 <?php
-    // Rimuoviamo i messaggi dalla sessione per non riaprirli al refresh
     unset($_SESSION['delete_success'], $_SESSION['delete_error']);
 endif;
 ?>
-
-
 
 <div class="container mt-5">
     <h2>Ricerca Prenotazioni</h2>
@@ -249,7 +237,7 @@ endif;
         <?php unset($_SESSION['delete_error']); ?>
     <?php endif; ?>
 
-    <!-- Form ricerca -->
+    <!-- Form ricerca (ripristinato alla versione precedente: singoli blocchi mb-3) -->
     <div class="card mb-4">
         <div class="card-body">
             <form method="get" action="ricerca.php">
@@ -290,13 +278,13 @@ endif;
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Acconto minimo (€)</label>
-                    <input type="number" step="0.01" name="acconto_min" class="form-control" value="<?= htmlspecialchars($_GET['acconto_min'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <label class="form-label">Acconto (€)</label>
+                    <input type="number" step="0.01" name="acconto" class="form-control" value="<?= htmlspecialchars($_GET['acconto'] ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Valore esatto acconto">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Acconto massimo (€)</label>
-                    <input type="number" step="0.01" name="acconto_max" class="form-control" value="<?= htmlspecialchars($_GET['acconto_max'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <label class="form-label">Posti disponibili (min)</label>
+                    <input type="number" name="posti_disponibili" class="form-control" min="0" value="<?= htmlspecialchars($_GET['posti_disponibili'] ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Minimo posti disponibili">
                 </div>
 
                 <div class="mb-3">
@@ -316,51 +304,53 @@ endif;
         </div>
     </div>
 
-    <!-- Risultati -->
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="row">ID</th>
-                <th scope="row">Cliente</th>
-                <th scope="row">Destinazione</th>
-                <th scope="row">Data</th>
-                <th scope="row">Acconto (€)</th>
-                <th scope="row">Assicurazione</th>
-                <th scope="row">Azioni</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if ($prenotazioni): ?>
-                <?php foreach ($prenotazioni as $p): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td><?= htmlspecialchars($p['cognome'] . " " . $p['nome'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td><?= htmlspecialchars($p['citta'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td><?= htmlspecialchars($p['dataprenotazione'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td><?= htmlspecialchars(number_format((float)$p['acconto'], 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?></td>
-                        <td><?= ((int)$p['assicurazione']) ? 'Sì' : 'No' ?></td>
-                        <td>
-                            <!-- Modifica prenotazione: PASSIAMO SEMPRE il parametro back con l'URI corrente -->
-                            <a href="modifica_prenotazione.php?id=<?= urlencode($p['id']) ?>&back=<?= urlencode($current_request_uri) ?>" class="btn btn-sm btn-warning" title="Modifica">✏️</a>
-
-                            <!-- Bottone per aprire la modal di conferma eliminazione -->
-                            <button type="button"
-                                class="btn btn-sm btn-danger btn-delete"
-                                data-id="<?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-info="<?= htmlspecialchars($p['cognome'] . ' ' . $p['nome'] . ' — ' . $p['citta'] . ' (' . $p['dataprenotazione'] . ')', ENT_QUOTES, 'UTF-8') ?>"
-                                title="Elimina">
-                                🗑️
-                            </button>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
+    <!-- Risultati: tabella responsive tramite classi Bootstrap -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-sm align-middle">
+            <thead class="table-light">
                 <tr>
-                    <td colspan="7" class="text-center">Nessuna prenotazione trovata</td>
+                    <th>Cliente</th>
+                    <th>Destinazione</th>
+                    <th>Posti disponibili</th>
+                    <th>Data</th>
+                    <th>Acconto (€)</th>
+                    <th class="d-none d-sm-table-cell">Assicurazione</th>
+                    <th>Azioni</th>
                 </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php if ($prenotazioni): ?>
+                    <?php foreach ($prenotazioni as $p): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($p['cognome'] . " " . $p['nome'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($p['citta'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars((isset($p['posti_disponibili']) ? (int)$p['posti_disponibili'] : '-'), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($p['dataprenotazione'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars(number_format((float)$p['acconto'], 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="d-none d-sm-table-cell"><?= ((int)$p['assicurazione']) ? 'Sì' : 'No' ?></td>
+                            <td>
+                                <div class="d-flex flex-column flex-sm-row gap-1">
+                                    <a href="modifica_prenotazione.php?id=<?= urlencode($p['id']) ?>&back=<?= urlencode($current_request_uri) ?>" class="btn btn-sm btn-warning" title="Modifica">✏️</a>
+
+                                    <button type="button"
+                                        class="btn btn-sm btn-danger btn-delete"
+                                        data-id="<?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?>"
+                                        data-info="<?= htmlspecialchars($p['cognome'] . ' ' . $p['nome'] . ' — ' . $p['citta'] . ' (' . $p['dataprenotazione'] . ')', ENT_QUOTES, 'UTF-8') ?>"
+                                        title="Elimina">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="7" class="text-center">Nessuna prenotazione trovata</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Modal di conferma eliminazione -->
@@ -390,7 +380,6 @@ endif;
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Apri modal quando si clicca sul pulsante elimina
         var deleteButtons = document.querySelectorAll('.btn-delete');
         var deleteModalEl = document.getElementById('confirmDeleteModal');
         var delInfoSpan = document.getElementById('delInfo');
@@ -405,7 +394,6 @@ endif;
                 var info = this.dataset.info || '';
                 eliminaInput.value = id;
                 delInfoSpan.textContent = info;
-                // Inizializza modal se necessario e mostra
                 if (!bootstrapModal) {
                     bootstrapModal = new bootstrap.Modal(deleteModalEl);
                 }
@@ -413,9 +401,7 @@ endif;
             });
         });
 
-        // Quando l'utente conferma, submit del form POST
         confirmBtn.addEventListener('click', function() {
-            // submit via form standard (POST)
             document.getElementById('deleteForm').submit();
         });
     });

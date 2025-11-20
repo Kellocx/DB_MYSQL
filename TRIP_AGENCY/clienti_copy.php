@@ -225,62 +225,36 @@ if ($result === false) {
         </div>
     </div>
 
-    <!-- Stili specifici per mobile: riduzione testi e bottoni -->
-    <style>
-        @media (max-width: 575.98px) {
-
-            /* Riduci il testo della tabella sui dispositivi XS */
-            .table th,
-            .table td {
-                font-size: 0.78rem;
-                padding: 0.45rem 0.5rem;
-            }
-
-            /* Riduci i bottoni piccoli */
-            .table .btn-sm {
-                padding: 0.25rem 0.4rem;
-                font-size: 0.72rem;
-                line-height: 1;
-            }
-
-            /* Riduci label del form (se necessario) */
-            .card .form-control,
-            .card label {
-                font-size: 0.92rem;
-            }
-        }
-    </style>
-
-    <!-- Tabella clienti: nascondiamo colonne non essenziali su XS con Bootstrap classes -->
+    <!-- Tabella clienti -->
     <div class="table-responsive">
-        <table class="table table-striped table-hover table-sm align-middle">
+        <table class="table table-striped table-hover table-sm align-middle w-100">
             <thead>
                 <tr>
-
-                    <th>Nome</th>
-                    <th>Cognome</th>
-                    <th class="d-none d-sm-table-cell">Data nascita</th>
-                    <th class="d-none d-sm-table-cell">Email</th>
-                    <th>Telefono</th>
-                    <th class="d-none d-sm-table-cell">Nazione</th>
-                    <th class="d-none d-sm-table-cell">Codice Fiscale</th>
-                    <th class="d-none d-sm-table-cell">Documento</th>
-                    <th>Azioni</th>
+                   
+                    <th class="text-nowrap">Nome</th>
+                    <th class="text-nowrap">Cognome</th>
+                    <th class="text-nowrap">Data nascita</th>
+                    <th class="text-nowrap">Email</th>
+                    <th class="text-nowrap">Telefono</th>
+                    <th class="text-nowrap">Nazione</th>
+                    <th class="text-nowrap">Codice Fiscale</th>
+                    <th class="text-nowrap">Documento</th>
+                    <th class="text-nowrap">Azioni</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if ($result && $result->num_rows > 0): ?>
                     <?php while ($row = $result->fetch_assoc()): ?>
                         <tr>
-
-                            <td><?= htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($row['cognome'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="d-none d-sm-table-cell"><?= htmlspecialchars($row['data_nascita'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="d-none d-sm-table-cell text-truncate" style="max-width:220px;"><?= htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($row['telefono'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="d-none d-sm-table-cell"><?= htmlspecialchars($row['nazione'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="d-none d-sm-table-cell"><?= htmlspecialchars($row['codice_fiscale'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="d-none d-sm-table-cell">
+                           
+                            <td class="text-truncate" style="max-width:200px;"><?= htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="text-truncate" style="max-width:200px;"><?= htmlspecialchars($row['cognome'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($row['data_nascita'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="text-truncate" style="max-width:220px;"><?= htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="text-truncate" style="max-width:140px;"><?= htmlspecialchars($row['telefono'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="text-truncate" style="max-width:140px;"><?= htmlspecialchars($row['nazione'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="text-truncate" style="max-width:160px;"><?= htmlspecialchars($row['codice_fiscale'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
                                 <?php if (!empty($row['documento'])): ?>
                                     <a href="<?= htmlspecialchars($row['documento'], ENT_QUOTES, 'UTF-8') ?>" target="_blank">Visualizza</a>
                                 <?php else: ?>
