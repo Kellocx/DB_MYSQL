@@ -169,45 +169,47 @@ include 'header.php';
     </form>
 </div>
 
-<div class="container mt-5">
+<div class="container mt-5 ">
     <h2>Elenco Destinazioni</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Città</th>
-                <th>Paese</th>
-                <th>Prezzo (€)</th>
-                <th>Data Partenza</th>
-                <th>Data Ritorno</th>
-                <th>Posti Disponibili</th>
-                <th>Azioni</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($destinazioni as $d): ?>
+    <div class="table-responsive-sm">
+        <table class="table table-striped table-responsive">
+            <thead>
                 <tr>
-                    <td><?= htmlspecialchars($d['id'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($d['paese'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($d['prezzo'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($d['data_partenza'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($d['data_ritorno'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($d['posti_disponibili'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td>
-                        <a href="modifica_destinazioni.php?id=<?= (int)$d['id'] ?>"
-                            class="btn btn-sm btn-warning"
-                            title="Modifica destinazione" aria-label="Modifica destinazione">✏️</a>
-
-                        <a href="?elimina=<?= (int)$d['id'] ?>"
-                            class="btn btn-sm btn-danger"
-                            title="Elimina destinazione" aria-label="Elimina destinazione"
-                            onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
-                    </td>
+                    
+                    <th scope="row">Città</th>
+                    <th scope="row">Paese</th>
+                    <th scope="row">Prezzo (€)</th>
+                    <th scope="row">Data Partenza</th>
+                    <th scope="row">Data Ritorno</th>
+                    <th scope="row">Posti Disponibili</th>
+                    <th scope="row">Azioni</th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php foreach ($destinazioni as $d): ?>
+                    <tr>
+                       
+                        <td><?= htmlspecialchars($d['citta'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= htmlspecialchars($d['paese'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= htmlspecialchars($d['prezzo'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= htmlspecialchars($d['data_partenza'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= htmlspecialchars($d['data_ritorno'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= htmlspecialchars($d['posti_disponibili'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td>
+                            <a href="modifica_destinazioni.php?id=<?= (int)$d['id'] ?>"
+                                class="btn btn-sm btn-warning"
+                                title="Modifica destinazione" aria-label="Modifica destinazione">✏️</a>
+
+                            <a href="?elimina=<?= (int)$d['id'] ?>"
+                                class="btn btn-sm btn-danger"
+                                title="Elimina destinazione" aria-label="Elimina destinazione"
+                                onclick="return confirm('Eliminare questa destinazione?')">🗑️</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <?php if (!empty($messaggio)): ?>

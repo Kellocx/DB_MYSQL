@@ -226,7 +226,7 @@ if ($result === false) {
     </div>
 
     <!-- Tabella clienti -->
-    <table class="table table-striped">
+    <table class="table table-striped table-responsive">
         <thead>
             <tr>
                 <th scope="row">ID</th>

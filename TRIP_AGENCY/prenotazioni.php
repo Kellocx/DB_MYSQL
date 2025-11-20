@@ -284,7 +284,7 @@ if ($res_pren = mysqli_query($conn, $sql_pren)) {
     </div>
 
     <!-- Tabella Prenotazioni -->
-    <table class="table table-striped">
+    <table class="table table-striped table-responsive">
         <thead>
             <tr>
                 <th scope="row">ID</th>
